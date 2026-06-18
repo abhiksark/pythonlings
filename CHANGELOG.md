@@ -1,7 +1,34 @@
 # Changelog
 
-All notable changes to this project are documented here. Pylings follows
+All notable changes to this project are documented here. Pythonlings follows
 Semantic Versioning.
+
+## [0.3.0] - 2026-06-10
+
+### Added
+
+- The in-app reference (`F5`) now bundles a second complementary section from
+  the official Python documentation for every topic, roughly tripling each
+  topic's offline reference content.
+
+### Changed
+
+- The project is renamed from pylings to **pythonlings**. The PyPI package
+  (previously `python-learnings`), the CLI command (previously `pylings`),
+  and the Python package are all now `pythonlings`. Existing workspaces are
+  migrated automatically: a legacy `.pylings/` state directory is renamed to
+  `.pythonlings/` on the next run, preserving progress and reset snapshots.
+- The README and quick-start now describe the built-in editor accurately:
+  checks rerun as you type in the TUI editor.
+
+### Fixed
+
+- Running `pythonlings` outside a workspace now explains how to create one
+  with `pythonlings init` instead of a bare "info.toml not found".
+
+### Removed
+
+- The unused `watchdog` dependency, for a lighter install.
 
 ## [0.2.0] - 2026-05-30
 
@@ -34,7 +61,7 @@ Semantic Versioning.
 - 292 Python exercises across 31 topics with mirrored hidden checks.
 - Bundled local Python documentation snippets generated from official docs.
 - In-app documentation modal with `F5`, `Esc`, and `O` keyboard flow.
-- PyPI distribution name `python-learnings`, which installs the `pylings` command.
+- PyPI distribution name `pythonlings`, which installs the `pythonlings` command.
 - Contributor guide, screenshots, release flow notes, and MIT license.
 
 ### Verified

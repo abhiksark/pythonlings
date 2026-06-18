@@ -1,12 +1,12 @@
 from pathlib import Path
 
-from pylings.core.docs import load_snippet, load_topic_snippet
-from pylings.core.manifest import load
-from pylings.screens.docs import DocsScreen
+from pythonlings.core.docs import load_snippet
+from pythonlings.core.manifest import load
+from pythonlings.screens.docs import DocsScreen
 
 
-def test_load_topic_snippet_returns_bundled_reference() -> None:
-    snippet = load_topic_snippet("variables")
+def test_load_snippet_returns_bundled_reference() -> None:
+    snippet = load_snippet("variables")
     assert snippet is not None
     assert snippet.topic == "variables"
     assert snippet.title == "Variables"
@@ -14,8 +14,8 @@ def test_load_topic_snippet_returns_bundled_reference() -> None:
     assert "Assigning names" in snippet.text
 
 
-def test_load_topic_snippet_returns_none_for_unknown_topic() -> None:
-    assert load_topic_snippet("missing") is None
+def test_load_snippet_returns_none_for_unknown_topic() -> None:
+    assert load_snippet("missing") is None
 
 
 def test_load_snippet_falls_back_to_official_docs_url() -> None:
@@ -32,7 +32,7 @@ def test_real_curriculum_topics_have_bundled_references() -> None:
     repo = Path(__file__).parents[2]
     manifest = load(repo)
     missing = [
-        topic for topic in manifest.topics() if load_topic_snippet(topic) is None
+        topic for topic in manifest.topics() if load_snippet(topic) is None
     ]
     assert missing == []
 
