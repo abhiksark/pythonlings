@@ -254,10 +254,14 @@ def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv if argv is not None else sys.argv[1:])
 
-    workspace = getattr(args, "root", None) or getattr(args, "path", None)
-    if workspace is not None:
-        from pythonlings.core.curriculum import migrate_legacy_state_dir
-        migrate_legacy_state_dir(Path(workspace))
+    # Migrate any legacy .pylings/ state dir. init/update target --path; the
+    # in-workspace commands target --root. Both are no-ops without a legacy dir.
+    from pythonlings.core.curriculum import migrate_legacy_state_dir
+
+    for attr in ("path", "root"):
+        workspace = getattr(args, attr, None)
+        if workspace is not None:
+            migrate_legacy_state_dir(Path(workspace))
 
     try:
         if getattr(args, "debug", False):
