@@ -49,7 +49,10 @@ class Manifest:
 def load(root: Path) -> Manifest:
     info_path = root / "info.toml"
     if not info_path.exists():
-        raise ManifestError(f"info.toml not found at {info_path}")
+        raise ManifestError(
+            f"no pythonlings workspace here ({info_path} not found). "
+            "Run 'pythonlings init' to create one."
+        )
 
     with info_path.open("rb") as f:
         data = tomllib.load(f)

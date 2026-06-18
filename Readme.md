@@ -24,8 +24,8 @@ uvx pythonlings init --path ./learn-python
 cd learn-python && uvx pythonlings
 ```
 
-How it works: **edit** the broken exercise in your own editor → **save** →
-checks rerun and advance you to the next one. That's the whole loop.
+How it works: **edit** the broken exercise in the built-in editor → checks
+rerun as you type and advance you to the next one. That's the whole loop.
 
 Status: `v0.3.0`, alpha — published on PyPI as `pythonlings`.
 
