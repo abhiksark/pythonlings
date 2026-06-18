@@ -5,6 +5,12 @@ Semantic Versioning.
 
 ## [0.3.0] - 2026-06-10
 
+### Added
+
+- The in-app reference (`F5`) now bundles a second complementary section from
+  the official Python documentation for every topic, roughly tripling each
+  topic's offline reference content.
+
 ### Changed
 
 - The project is renamed from pylings to **pythonlings**. The PyPI package
@@ -12,6 +18,17 @@ Semantic Versioning.
   and the Python package are all now `pythonlings`. Existing workspaces are
   migrated automatically: a legacy `.pylings/` state directory is renamed to
   `.pythonlings/` on the next run, preserving progress and reset snapshots.
+- The README and quick-start now describe the built-in editor accurately:
+  checks rerun as you type in the TUI editor.
+
+### Fixed
+
+- Running `pythonlings` outside a workspace now explains how to create one
+  with `pythonlings init` instead of a bare "info.toml not found".
+
+### Removed
+
+- The unused `watchdog` dependency, for a lighter install.
 
 ## [0.2.0] - 2026-05-30
 
