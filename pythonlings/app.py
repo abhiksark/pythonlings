@@ -19,7 +19,6 @@ class PythonlingsApp(App[int]):
         root: Path,
         start_topic: str | None = None,
         force_picker: bool = False,
-        watch_files: bool = False,
     ) -> None:
         super().__init__()
         self.root = root
@@ -27,7 +26,6 @@ class PythonlingsApp(App[int]):
         self.state: State = load_state(root)
         self._start_topic = start_topic
         self._force_picker = force_picker
-        self.watch_files = watch_files
 
     def on_mount(self) -> None:
         self.push_screen(TopicPickerScreen())
@@ -75,14 +73,12 @@ def run_tui(
     root: Path,
     start_topic: str | None = None,
     force_picker: bool = False,
-    watch_files: bool = False,
 ) -> int:
     return (
         PythonlingsApp(
             root,
             start_topic,
             force_picker=force_picker,
-            watch_files=watch_files,
         ).run()
         or 0
     )

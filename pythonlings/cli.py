@@ -15,11 +15,6 @@ def _build_parser() -> argparse.ArgumentParser:
         "--debug", action="store_true", help="Write debug output to .pythonlings_debug.log."
     )
     parser.add_argument(
-        "--watch-files",
-        action="store_true",
-        help="Rerun checks when exercise files change outside the TUI.",
-    )
-    parser.add_argument(
         "--root",
         type=Path,
         default=Path.cwd(),
@@ -305,7 +300,6 @@ def main(argv: list[str] | None = None) -> int:
                 args.root,
                 start_topic,
                 force_picker=args.command == "topics",
-                watch_files=getattr(args, "watch_files", False),
             )
 
         # Other subcommands wired in later tasks.

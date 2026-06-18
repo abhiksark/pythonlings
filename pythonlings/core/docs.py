@@ -16,19 +16,6 @@ class DocSnippet:
     text: str
 
 
-def load_topic_snippet(topic: str) -> DocSnippet | None:
-    """Load the bundled local docs snippet for a curriculum topic."""
-    index = _load_index()
-    if index is None:
-        return None
-
-    entry = index["topics"].get(topic)
-    if entry is None:
-        return None
-
-    return _load_entry(topic, entry)
-
-
 def load_snippet(topic: str, source_url: str = "") -> DocSnippet | None:
     """Load a bundled snippet by topic, falling back to an official docs URL."""
     index = _load_index()

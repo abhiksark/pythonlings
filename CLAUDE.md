@@ -46,7 +46,7 @@ An exercise passes when a generated runner script `exec()`s the exercise source 
 
 ### Layering
 
-- `pylings/core/` — all filesystem, manifest, state, reset, solutions, runner, and watcher logic. No UI imports.
+- `pythonlings/core/` — all filesystem, manifest, state, reset, solutions, and runner logic. No UI imports. (Checks rerun on a debounce in the TUI editor, not a filesystem watcher.)
 - `pylings/screens/` and `pylings/widgets/` — Textual UI only; `pylings/app.py` wires them up; `pylings.tcss` holds styles.
 - `pylings/cli.py` — argparse subcommands; entry point `pylings = "pylings.cli:main"`.
 
