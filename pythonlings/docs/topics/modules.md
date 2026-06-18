@@ -33,3 +33,65 @@ called `fibo.py` in the current directory with the following contents:
 
 ```python
 # Fibonacci numbers module
+
+def fib(n):
+"""Write Fibonacci series up to n."""
+a, b = 0, 1
+while a < n:
+print(a, end=' ')
+a, b = b, a+b
+print()
+
+def fib2(n):
+"""Return Fibonacci series up to n."""
+result = []
+a, b = 0, 1
+while a < n:
+result.append(a)
+
+## More reference
+
+Source: https://docs.python.org/3/library/importlib.html#importlib.reload
+
+Reloading and dynamically importing modules with importlib.
+
+importlib.reload(module)
+
+Reload a previously imported module. The argument must be a module object,
+so it must have been successfully imported before. This is useful if you
+have edited the module source file using an external editor and want to try
+out the new version without leaving the Python interpreter. The return value
+is the module object (which can be different if re-importing causes a
+different object to be placed in `sys.modules`).
+
+When `reload()` is executed:
+
+-
+
+Python module’s code is recompiled and the module-level code re-executed,
+defining a new set of objects which are bound to names in the module’s
+dictionary by reusing the loader which originally loaded the
+module. The `init` function of extension modules is not called a second
+time.
+
+-
+
+As with all other objects in Python the old objects are only reclaimed
+after their reference counts drop to zero.
+
+-
+
+The names in the module namespace are updated to point to any new or
+changed objects.
+
+-
+
+Other references to the old objects (such as names external to the module) are
+not rebound to refer to the new objects and must be updated in each namespace
+where they occur if that is desired.
+
+There are a number of other caveats:
+
+When a module is reloaded, its dictionary (containing the module’s global
+variables) is retained. Redefinitions of names will override the old
+definitions, so this is generally not a problem. If the new version of a

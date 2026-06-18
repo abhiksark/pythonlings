@@ -34,3 +34,64 @@ For example:
 ```
 
 The integer numbers (e.g. `2`, `4`, `20`) have type `int`,
+the ones with a fractional part (e.g. `5.0`, `1.6`) have type
+`float`. We will see more about numeric types later in the tutorial.
+
+Division (`/`) always returns a float. To do floor division and
+get an integer result you can use the `//` operator; to calculate
+the remainder you can use `%`:
+
+```python
+>>> 17 / 3 # classic division returns a float
+5.666666666666667
+>>>
+>>> 17 // 3 # floor division discards the fractional part
+5
+>>> 17 % 3 # the % operator returns the remainder of the division
+
+## More reference
+
+Source: https://docs.python.org/3/reference/simple_stmts.html#assignment-statements
+
+Assignment statement syntax and semantics, including multiple and unpacking targets.
+
+7.2. Assignment statements
+
+Assignment statements are used to (re)bind names to values and to modify
+attributes or items of mutable objects:
+
+```python
+
+assignment_stmt: (target_list "=")+ (starred_expression | yield_expression)
+target_list: target ("," target)* [","]
+target: identifier
+| "(" [target_list] ")"
+| "[" [target_list] "]"
+| attributeref
+| subscription
+| "*" target
+
+```
+
+(See section Primaries for the syntax definitions for attributeref
+and subscription.)
+
+An assignment statement evaluates the expression list (remember that this can be
+a single expression or a comma-separated list, the latter yielding a tuple) and
+assigns the single resulting object to each of the target lists, from left to
+right.
+
+Assignment is defined recursively depending on the form of the target (list).
+When a target is part of a mutable object (an attribute reference or
+subscription), the mutable object must ultimately perform the assignment and
+decide about its validity, and may raise an exception if the assignment is
+unacceptable. The rules observed by various types and the exceptions raised are
+given with the definition of the object types (see section The standard type hierarchy).
+
+Assignment of an object to a target list, optionally enclosed in parentheses or
+square brackets, is recursively defined as follows.
+
+-
+
+If the target list is a single target with no trailing comma,
+optionally in parentheses, the object is assigned to that target.

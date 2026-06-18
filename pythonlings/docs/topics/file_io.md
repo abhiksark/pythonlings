@@ -34,3 +34,63 @@ If encoding is not specified, the default is platform dependent
 (see `open()`).
 Because UTF-8 is the modern de-facto standard, `encoding="utf-8"` is
 recommended unless you know that you need to use a different encoding.
+Appending a `'b'` to the mode opens the file in binary mode.
+Binary mode data is read and written as `bytes` objects.
+You can not specify encoding when opening file in binary mode.
+
+In text mode, the default when reading is to convert platform-specific line
+endings (`\n` on Unix, `\r\n` on Windows) to just `\n`. When writing in
+text mode, the default is to convert occurrences of `\n` back to
+platform-specific line endings. This behind-the-scenes modification
+to file data is fine for text files, but will corrupt binary data like that in
+`JPEG` or `EXE` files. Be very careful to use binary mode when
+reading and writing such files.
+
+It is good practice to use the `with` keyword when dealing
+with file objects. The advantage is that the file is properly closed
+
+## More reference
+
+Source: https://docs.python.org/3/library/io.html#high-level-module-interface
+
+The high-level `open()` interface and its modes.
+
+High-level Module Interface
+
+io.DEFAULT_BUFFER_SIZE
+
+An int containing the default buffer size used by the module’s buffered I/O
+classes. `open()` uses the file’s blksize (as obtained by
+`os.stat()`) if possible.
+
+io.open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)
+
+This is an alias for the builtin `open()` function.
+
+This function raises an auditing event `open` with
+arguments path, mode and flags. The mode and flags
+arguments may have been modified or inferred from the original call.
+
+io.open_code(path)
+
+Opens the provided file with mode `'rb'`. This function should be used
+when the intent is to treat the contents as executable code.
+
+path should be a `str` and an absolute path.
+
+The behavior of this function may be overridden by an earlier call to the
+`PyFile_SetOpenCodeHook()`. However, assuming that path is a
+`str` and an absolute path, `open_code(path)` should always behave
+the same as `open(path, 'rb')`. Overriding the behavior is intended for
+additional validation or preprocessing of the file.
+
+Added in version 3.8.
+
+io.text_encoding(encoding, stacklevel=2, /)
+
+This is a helper function for callables that use `open()` or
+`TextIOWrapper` and have an `encoding=None` parameter.
+
+This function returns encoding if it is not `None`.
+Otherwise, it returns `"locale"` or `"utf-8"` depending on
+UTF-8 Mode.

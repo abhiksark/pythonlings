@@ -34,3 +34,63 @@ value associated with that key is forgotten.
 
 Extracting a value for a non-existent key by subscripting (`d[key]`) raises a
 `KeyError`. To avoid getting this error when trying to access a possibly
+non-existent key, use the `get()` method instead, which returns
+`None` (or a specified default value) if the key is not in the dictionary.
+
+Performing `list(d)` on a dictionary returns a list of all the keys
+used in the dictionary, in insertion order (if you want it sorted, just use
+`sorted(d)` instead). To check whether a single key is in the
+dictionary, use the `in` keyword.
+
+Here is a small example using a dictionary:
+
+```python
+>>> tel = {'jack': 4098, 'sape': 4139}
+>>> tel['guido'] = 4127
+>>> tel
+
+## More reference
+
+Source: https://docs.python.org/3/library/stdtypes.html#mapping-types-dict
+
+The dict type with constructor forms, methods, and creation examples.
+
+Mapping Types — `dict`
+
+A mapping object maps hashable values to arbitrary objects.
+Mappings are mutable objects. There is currently only one standard mapping
+type, the dictionary. (For other containers see the built-in
+`list`, `set`, and `tuple` classes, and the
+`collections` module.)
+
+A dictionary’s keys are almost arbitrary values. Values that are not
+hashable, that is, values containing lists, dictionaries or other
+mutable types (that are compared by value rather than by object identity) may
+not be used as keys.
+Values that compare equal (such as `1`, `1.0`, and `True`)
+can be used interchangeably to index the same dictionary entry.
+
+class dict(**kwargs)
+
+class dict(mapping, /, **kwargs)
+
+class dict(iterable, /, **kwargs)
+
+Return a new dictionary initialized from an optional positional argument
+and a possibly empty set of keyword arguments.
+
+Dictionaries can be created by several means:
+
+-
+
+Use a comma-separated list of `key: value` pairs within braces:
+`{'jack': 4098, 'sjoerd': 4127}` or `{4098: 'jack', 4127: 'sjoerd'}`
+
+-
+
+Use a dict comprehension: `{}`, `{x: x ** 2 for x in range(10)}`
+
+-
+
+Use the type constructor: `dict()`,
+`dict([('foo', 100), ('bar', 200)])`, `dict(foo=100, bar=200)`
