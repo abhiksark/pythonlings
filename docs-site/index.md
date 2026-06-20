@@ -1,36 +1,42 @@
-# Pythonlings
+---
+hide:
+  - toc
+---
 
-Python learnings, Rustlings-style, in a live terminal TUI.
+<div class="pl-hero" markdown>
+  <div class="pl-eyebrow">Rustlings for Python</div>
+  <div class="pl-title">Learn Python by fixing tiny broken programs.</div>
+  <div class="pl-subtitle">292 exercises across 31 topics. Hidden checks rerun the
+    instant you save — fix the code, watch it go green, advance.</div>
+  <div class="pl-install">$ uvx pythonlings init</div>
+  <div class="pl-ctas">
+    <a class="pl-btn" href="quick-start/">Get started →</a>
+    <a class="pl-btn pl-btn--ghost" href="https://github.com/abhiksark/pythonlings">View on GitHub</a>
+  </div>
+  <div class="pl-stats"><span><b>292</b> exercises</span><span><b>31</b> topics</span><span><b>zero</b> setup</span></div>
+</div>
 
 ![Pythonlings terminal demo](https://raw.githubusercontent.com/abhiksark/pythonlings/main/docs/assets/demos/pythonlings-demo.gif)
 
-Pythonlings helps learners practice Python by fixing small broken programs and
-watching checks rerun as they work. The project includes 292 exercises across
-31 topics, hidden pytest-style checks, a Textual editor, progressive hints, and
-bundled Python documentation snippets for offline-friendly practice.
+## What you get
 
-## Start Here
-
-```bash
-pipx install "git+https://github.com/abhiksark/pythonlings.git@v0.1.0"
-pythonlings init --path ~/pythonlings-workspace
-cd ~/pythonlings-workspace
-pythonlings
-```
-
-The package name reserved for PyPI publishing is `pythonlings`. Until the
-PyPI release is live, install the stable v0.1.0 release from the GitHub tag.
-
-## What You Get
-
-- Rustlings-inspired Python coding practice in the terminal.
-- Live exercise verification while editing.
-- Topic picker, progress tracking, reset, hints, and one-shot CLI commands.
-- Local docs window with links back to the official Python documentation.
+- Rustlings-inspired Python practice, entirely in your terminal.
+- Hidden checks that rerun as you type and advance you automatically.
+- Topic picker, progress tracking, reset, progressive hints, and one-shot CLI commands.
+- A local docs window with links back to the official Python documentation.
 - A self-contained learner workspace created by `pythonlings init`.
 
-## Project Status
+## Start here
 
-Pythonlings is currently `v0.1.0` alpha. The public API, CLI, and curriculum are
-usable, but the project is still hardening packaging, docs, first-run flow, and
-release automation.
+```bash
+uvx pythonlings init --path ~/pythonlings-workspace
+cd ~/pythonlings-workspace
+uvx pythonlings
+```
+
+Prefer a permanent install? See [Quick Start](quick-start.md) for `pipx`, `uv tool`, and `pip`.
+
+## Project status
+
+Pythonlings is `v0.3.1`, published on PyPI as `pythonlings`. The learner loop, CLI, and
+curriculum are stable; see the [Roadmap](roadmap.md) for what's next.
