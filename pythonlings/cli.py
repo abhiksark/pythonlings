@@ -83,13 +83,18 @@ def _resolve_topic(manifest, topic: str):
 
 def _cmd_init(path: Path, force: bool) -> int:
     from pythonlings.core.curriculum import WorkspaceError, init_workspace
+    from pythonlings.core.workspace import is_workspace
 
+    path = path.expanduser().resolve()
+    if is_workspace(path) and not force:
+        print(f"Already set up at {path} — just run `pythonlings`")
+        return 0
     try:
         root = init_workspace(path, force=force)
     except WorkspaceError as e:
         sys.stderr.write(f"pythonlings: {e}\n")
         return 1
-    print(f"initialized: {root}")
+    print(f"Created your workspace at {root}")
     return 0
 
 

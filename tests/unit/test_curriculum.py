@@ -38,7 +38,7 @@ def test_init_workspace_refuses_non_empty_directory(tmp_path: Path) -> None:
     try:
         curriculum.init_workspace(target)
     except curriculum.WorkspaceError as exc:
-        assert "already exists and is not empty" in str(exc)
+        assert "isn't empty and isn't a pythonlings workspace" in str(exc)
     else:
         raise AssertionError("expected WorkspaceError")
 

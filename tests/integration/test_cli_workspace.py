@@ -14,17 +14,35 @@ def test_init_command_creates_workspace(tmp_path: Path) -> None:
     assert (target / "checks").is_dir()
 
 
-def test_init_command_requires_force_for_non_empty_directory(
-    tmp_path: Path, capsys
-) -> None:
-    target = tmp_path / "learn-python"
+def test_init_rejects_non_empty_non_workspace_dir(tmp_path: Path, capsys) -> None:
+    target = tmp_path / "stuff"
     target.mkdir()
     (target / "notes.txt").write_text("keep", encoding="utf-8")
 
     code = main(["init", "--path", str(target)])
 
     assert code == 1
-    assert "already exists and is not empty" in capsys.readouterr().err
+    err = capsys.readouterr().err
+    assert "isn't empty and isn't a pythonlings workspace" in err
+
+
+def test_init_on_existing_workspace_is_friendly_noop(tmp_path: Path, capsys) -> None:
+    target = tmp_path / "ws"
+    assert main(["init", "--path", str(target)]) == 0
+    capsys.readouterr()  # discard first output
+
+    code = main(["init", "--path", str(target)])
+
+    assert code == 0
+    assert "Already set up" in capsys.readouterr().out
+
+
+def test_init_force_overwrites_existing_workspace(tmp_path: Path) -> None:
+    target = tmp_path / "ws"
+    assert main(["init", "--path", str(target)]) == 0
+    code = main(["init", "--path", str(target), "--force"])
+    assert code == 0
+    assert (target / "info.toml").exists()
 
 
 def test_update_via_path_migrates_legacy_state_dir(tmp_path: Path) -> None:

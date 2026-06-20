@@ -79,7 +79,10 @@ def _sync_originals(root: Path, src_root: Path) -> None:
 def init_workspace(path: Path, *, force: bool = False) -> Path:
     path = path.expanduser().resolve()
     if path.exists() and any(path.iterdir()) and not force:
-        raise WorkspaceError(f"{path} already exists and is not empty")
+        raise WorkspaceError(
+            f"{path} isn't empty and isn't a pythonlings workspace. "
+            "Pick another location with --path <dir>, or --force to set up here anyway."
+        )
     path.mkdir(parents=True, exist_ok=True)
 
     src_root = source_root()
