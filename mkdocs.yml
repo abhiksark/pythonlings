@@ -52,6 +52,8 @@ markdown_extensions:
 
 plugins:
   - search
+  - social:
+      enabled: !ENV [CI, false]
 
 nav:
   - Home: index.md
@@ -68,6 +70,10 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/abhiksark/pythonlings
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/pythonlings/
+
+copyright: Copyright &copy; 2026 Pythonlings · MIT License
 
 extra_css:
   - stylesheets/extra.css
