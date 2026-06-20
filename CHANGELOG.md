@@ -7,6 +7,10 @@ Semantic Versioning.
 
 ### Fixed
 
+- `pythonlings --version` now reports the installed package version instead of
+  a separate hardcoded string in `cli.py` (which had drifted to `0.3.0`). The
+  version is read from package metadata, so it can no longer fall out of sync
+  with `pyproject.toml`.
 - Corrected stale `pylings` references in the contributor guide (`CLAUDE.md`):
   the smoke-test command, manual-testing flows, package paths, stylesheet, and
   entry point now consistently use the `pythonlings` name the project adopted

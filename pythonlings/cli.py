@@ -3,9 +3,13 @@ from __future__ import annotations
 
 import argparse
 import sys
+from importlib.metadata import PackageNotFoundError, version as _package_version
 from pathlib import Path
 
-__version__ = "0.3.0"
+try:
+    __version__ = _package_version("pythonlings")
+except PackageNotFoundError:  # running from a source checkout without an install
+    __version__ = "0.0.0+unknown"
 
 
 def _build_parser() -> argparse.ArgumentParser:
