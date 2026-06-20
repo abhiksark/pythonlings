@@ -3,6 +3,20 @@
 All notable changes to this project are documented here. Pythonlings follows
 Semantic Versioning.
 
+## [0.3.1] - 2026-06-20
+
+### Fixed
+
+- `pythonlings --version` now reports the installed package version instead of
+  a separate hardcoded string in `cli.py` (which had drifted to `0.3.0`). The
+  version is read from package metadata, so it can no longer fall out of sync
+  with `pyproject.toml`.
+- Corrected stale `pylings` references in the contributor guide (`CLAUDE.md`):
+  the smoke-test command, manual-testing flows, package paths, stylesheet, and
+  entry point now consistently use the `pythonlings` name the project adopted
+  in 0.3.0. (The unrelated `pylings` PyPI package belongs to a different
+  project; `pythonlings` is the only command this project ships.)
+
 ## [0.3.0] - 2026-06-10
 
 ### Added
