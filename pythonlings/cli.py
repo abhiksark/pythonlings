@@ -6,6 +6,8 @@ import sys
 from importlib.metadata import PackageNotFoundError, version as _package_version
 from pathlib import Path
 
+from pythonlings.core.workspace import default_workspace_root
+
 try:
     __version__ = _package_version("pythonlings")
 except PackageNotFoundError:  # running from a source checkout without an install
@@ -21,19 +23,19 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--root",
         type=Path,
-        default=Path.cwd(),
-        help="Project root containing info.toml (default: cwd).",
+        default=None,
+        help="Workspace root containing info.toml (default: auto-resolve).",
     )
     sub = parser.add_subparsers(dest="command")
 
     p_init = sub.add_parser("init", help="Create a pythonlings workspace.")
-    p_init.add_argument("--path", type=Path, default=Path.cwd())
+    p_init.add_argument("--path", type=Path, default=default_workspace_root())
     p_init.add_argument(
         "--force", action="store_true", help="Overwrite managed workspace files."
     )
 
     p_update = sub.add_parser("update", help="Update an existing pythonlings workspace.")
-    p_update.add_argument("--path", type=Path, default=Path.cwd())
+    p_update.add_argument("--path", type=Path, default=default_workspace_root())
 
     sub.add_parser("watch", help="Launch the TUI in watch mode (default).")
     sub.add_parser("topics", help="Launch the TUI on the topic picker.")
@@ -70,6 +72,14 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _display_path(path: Path) -> str:
+    """Render `path` with a leading `~/` when inside the home directory."""
+    try:
+        return "~/" + str(path.relative_to(Path.home()))
+    except ValueError:
+        return str(path)
+
+
 def _resolve_topic(manifest, topic: str):
     """Return the topic name if valid, else write an error and return None."""
     if topic in manifest.topics():
@@ -83,13 +93,18 @@ def _resolve_topic(manifest, topic: str):
 
 def _cmd_init(path: Path, force: bool) -> int:
     from pythonlings.core.curriculum import WorkspaceError, init_workspace
+    from pythonlings.core.workspace import is_workspace
 
+    path = path.expanduser().resolve()
+    if is_workspace(path) and not force:
+        print(f"Already set up at {path} — just run `pythonlings`")
+        return 0
     try:
         root = init_workspace(path, force=force)
     except WorkspaceError as e:
         sys.stderr.write(f"pythonlings: {e}\n")
         return 1
-    print(f"initialized: {root}")
+    print(f"Created your workspace at {_display_path(root)}")
     return 0
 
 
@@ -258,19 +273,29 @@ def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv if argv is not None else sys.argv[1:])
 
-    # Migrate any legacy .pylings/ state dir. init/update target --path; the
-    # in-workspace commands target --root. Both are no-ops without a legacy dir.
     from pythonlings.core.curriculum import migrate_legacy_state_dir
-
-    for attr in ("path", "root"):
-        workspace = getattr(args, attr, None)
-        if workspace is not None:
-            migrate_legacy_state_dir(Path(workspace))
+    from pythonlings.core.workspace import resolve_workspace_root
 
     try:
-        if getattr(args, "debug", False):
+        root: Path | None = None
+        if args.command in ("init", "update"):
+            migrate_legacy_state_dir(Path(args.path))
+        else:
+            launches_tui = args.command in (None, "watch", "start", "topics")
+            resolved = resolve_workspace_root(
+                Path.cwd(), args.root, create_if_missing=launches_tui
+            )
+            root = resolved.root
+            migrate_legacy_state_dir(root)
+            if resolved.created:
+                print(
+                    f"Created your workspace at {_display_path(root)} "
+                    "(edit in-app, or open that folder in your editor)"
+                )
+
+        if getattr(args, "debug", False) and root is not None:
             try:
-                (args.root / ".pythonlings_debug.log").write_text(
+                (root / ".pythonlings_debug.log").write_text(
                     f"argv={argv if argv is not None else sys.argv[1:]!r}\n",
                     encoding="utf-8",
                 )
@@ -282,30 +307,31 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "update":
             return _cmd_update(args.path)
 
+        assert root is not None
         if args.command == "verify":
-            return _cmd_verify(args.root, args.topic)
+            return _cmd_verify(root, args.topic)
         if args.command == "list":
-            return _cmd_list(args.root, args.topic)
+            return _cmd_list(root, args.topic)
         if args.command == "hint":
-            return _cmd_hint(args.root, args.name)
+            return _cmd_hint(root, args.name)
         if args.command == "run":
-            return _cmd_run(args.root, args.name)
+            return _cmd_run(root, args.name)
         if args.command == "dry-run":
-            return _cmd_run(args.root, args.name)
+            return _cmd_run(root, args.name)
         if args.command in {"solution", "sol"}:
-            return _cmd_solution(args.root, args.name)
+            return _cmd_solution(root, args.name)
         if args.command == "reset":
-            return _cmd_reset(args.root, args.name, args.yes)
+            return _cmd_reset(root, args.name, args.yes)
 
         if args.command in (None, "watch", "start", "topics"):
             start_topic = getattr(args, "topic", None)
             if start_topic is not None:
                 from pythonlings.core.manifest import load as load_manifest
-                if _resolve_topic(load_manifest(args.root), start_topic) is None:
+                if _resolve_topic(load_manifest(root), start_topic) is None:
                     return 2
             from pythonlings.app import run_tui  # lazy: Textual is heavy
             return run_tui(
-                args.root,
+                root,
                 start_topic,
                 force_picker=args.command == "topics",
             )

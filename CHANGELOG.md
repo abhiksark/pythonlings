@@ -3,6 +3,26 @@
 All notable changes to this project are documented here. Pythonlings follows
 Semantic Versioning.
 
+## [0.4.0] - 2026-06-20
+
+### Added
+
+- Zero-config first run: `pythonlings` with no workspace creates one at
+  `~/.pythonlings` and opens the first exercise — no `init`, no `--path`, no
+  `cd` required.
+- `PYTHONLINGS_HOME` environment variable to point the default workspace
+  somewhere else.
+
+### Changed
+
+- `pythonlings init` with no `--path` now targets `~/.pythonlings` instead of
+  the current directory, so it can no longer fail by landing in a folder full
+  of unrelated files.
+- `init` is now idempotent on an existing workspace (a friendly note instead of
+  an error), and its non-empty-directory error explains how to proceed.
+- Every command resolves its workspace the same way: an explicit `--root`, then
+  the current directory if it is a workspace, then `~/.pythonlings`.
+
 ## [0.3.1] - 2026-06-20
 
 ### Fixed
