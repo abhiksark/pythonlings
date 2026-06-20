@@ -45,14 +45,14 @@ loads quickly on GitHub and PyPI.
 
 The scripted flow should stay focused on the first-time user path:
 
-1. Initialize a clean workspace.
-2. Show topic progress with `pythonlings list`.
-3. Show a hint and official docs link with `pythonlings hint variables1`.
-4. Open the Pythonlings TUI.
-5. Show the first pending exercise in the coding screen.
-6. Open and close the local docs window with `F5` and `Esc`.
-7. Open the topic picker with `F4`.
-8. Quit with `Ctrl+Q`.
+1. Run `pythonlings` with no setup — it creates `~/.pythonlings` and opens the
+   first pending exercise (zero-config first run).
+2. Show the first pending exercise in the coding screen.
+3. Open and close the local docs window with `F5` and `Esc`.
+4. Open the topic picker with `F4`.
+5. Quit with `Ctrl+Q`.
+6. Show topic progress with `pythonlings list`.
+7. Show a hint and official docs link with `pythonlings hint variables1`.
 
 ## Fallback Workflow
 
