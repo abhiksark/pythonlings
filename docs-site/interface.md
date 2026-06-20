@@ -5,7 +5,7 @@
 ![Coding screen](https://raw.githubusercontent.com/abhiksark/pythonlings/main/docs/assets/screenshots/coding-screen.png)
 
 The coding screen keeps the exercise, editor, output, progress, and exercise
-list in one terminal view. Checks rerun as files change.
+list in one terminal view. Checks rerun automatically after each edit (debounced).
 
 ## Topic Picker
 

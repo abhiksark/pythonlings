@@ -1,22 +1,36 @@
 # Quick Start
 
-## Install
+> Current release: **v0.4.0** · [PyPI](https://pypi.org/project/pythonlings/)
 
-Install the current release from GitHub:
+## Zero-Install (uvx)
 
-```bash
-pipx install "git+https://github.com/abhiksark/pythonlings.git@v0.1.0"
-```
-
-After PyPI publishing is enabled, the package install path will be:
+No installation required — run Pythonlings directly with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-pipx install pythonlings
+uvx pythonlings init --path ~/pythonlings-workspace
+cd ~/pythonlings-workspace
+uvx pythonlings
 ```
 
-The command installed by the package is `pythonlings`.
+## Install Options
 
-## Create A Workspace
+=== "uv (recommended)"
+    ```bash
+    uvx pythonlings            # zero-install, always latest
+    uv tool install pythonlings
+    ```
+
+=== "pipx"
+    ```bash
+    pipx install pythonlings
+    ```
+
+=== "pip"
+    ```bash
+    pip install pythonlings
+    ```
+
+## Create a Workspace
 
 ```bash
 pythonlings init --path ~/pythonlings-workspace
@@ -25,27 +39,27 @@ pythonlings
 ```
 
 `pythonlings init` copies exercises, hidden checks, reference solutions, and reset
-snapshots into a learner workspace. Run `pythonlings` from that workspace to open
-the first pending exercise.
+snapshots into a self-contained learner workspace. Running `pythonlings` (or
+`pythonlings watch`) from that workspace opens the first pending exercise in the
+TUI.
 
 ## Useful Commands
 
 ```bash
-pythonlings list
-pythonlings topics
-pythonlings hint variables1
-pythonlings run variables1
-pythonlings dry-run variables1
-pythonlings reset variables1 --yes
-pythonlings update
+pythonlings list                 # show all topics and progress
+pythonlings topics               # open the topic picker in the TUI
+pythonlings start variables      # launch TUI on a specific topic
+pythonlings hint variables1      # print the hint for an exercise
+pythonlings solution variables1  # run the reference solution for an exercise
+pythonlings run variables1       # run a single exercise and show output
+pythonlings dry-run variables1   # non-interactive run (CI-friendly)
+pythonlings reset variables1 --yes  # restore exercise to its original state
+pythonlings update               # pull new exercises into an existing workspace
 ```
-
-Use `pythonlings list` to inspect progress, `pythonlings hint <exercise>` for help, and
-`pythonlings reset <exercise> --yes` to restore an exercise to its original broken
-state.
 
 ## Exercise Loop
 
-Each exercise contains a `# I AM NOT DONE` marker. Fix the code, remove the
-marker, and let Pythonlings run the hidden check. Passing checks mark the exercise
-complete and move the progress state forward.
+Each exercise contains a `# I AM NOT DONE` marker. Open the file in the TUI
+editor (or any editor), fix the broken code, then remove the marker. Pythonlings
+runs the hidden check automatically; when the check passes and the marker is gone,
+the exercise is marked complete and progress advances to the next one.

@@ -138,3 +138,6 @@ dmypy.json
 /pythonlings/.git/
 /pythonlings/.pythonlings.toml
 /pythonlings/exercises/
+
+# Docs build venv
+.venv-docs/
