@@ -27,7 +27,7 @@ jobs:
       - uses: actions/configure-pages@v5
       - run: python -m pip install -r requirements-docs.txt
       - name: Install social-card system deps
-        run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev pango1.0-tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev pango1.0-tools
       - run: mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3
         with:

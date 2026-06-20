@@ -50,6 +50,7 @@ pythonlings list                 # show all topics and progress
 pythonlings topics               # open the topic picker in the TUI
 pythonlings start variables      # launch TUI on a specific topic
 pythonlings hint variables1      # print the hint for an exercise
+pythonlings solution variables1  # run the reference solution for an exercise
 pythonlings run variables1       # run a single exercise and show output
 pythonlings dry-run variables1   # non-interactive run (CI-friendly)
 pythonlings reset variables1 --yes  # restore exercise to its original state
