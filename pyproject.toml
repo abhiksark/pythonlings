@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pythonlings"
-version = "0.3.1"
+version = "0.4.0"
 description = "Python learnings, Rustlings-style, in a terminal TUI."
 readme = "Readme.md"
 requires-python = ">=3.9"

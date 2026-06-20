@@ -20,14 +20,13 @@ Python documentation snippets so learners can work without leaving the terminal.
 and [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uvx pythonlings init --path ./learn-python
-cd learn-python && uvx pythonlings
+uvx pythonlings
 ```
 
 How it works: **edit** the broken exercise in the built-in editor → checks
 rerun as you type and advance you to the next one. That's the whole loop.
 
-Status: `v0.3.1`, alpha — published on PyPI as `pythonlings`.
+Status: `v0.4.0`, alpha — published on PyPI as `pythonlings`.
 
 ![Coding screen](docs/assets/screenshots/coding-screen.png)
 
@@ -49,8 +48,9 @@ Status: `v0.3.1`, alpha — published on PyPI as `pythonlings`.
 
 ## What Happens When You Run It
 
-1. `pythonlings init` creates a self-contained learner workspace with exercises,
-   hidden checks, local docs, and original snapshots for reset.
+1. `pythonlings` with no workspace creates a self-contained one at
+   `~/.pythonlings` (override with `PYTHONLINGS_HOME` or `pythonlings init
+   --path <dir>`) and opens the first exercise.
 2. `pythonlings` opens the first pending exercise in the terminal UI.
 3. You edit the broken code, remove `# I AM NOT DONE`, and checks rerun as you
    work.
