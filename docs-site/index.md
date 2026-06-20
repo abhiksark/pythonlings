@@ -38,5 +38,5 @@ Prefer a permanent install? See [Quick Start](quick-start.md) for `pipx`, `uv to
 
 ## Project status
 
-Pythonlings is `v0.3.1`, published on PyPI as `pythonlings`. The learner loop, CLI, and
+Pythonlings is `v0.4.0`, published on PyPI as `pythonlings`. The learner loop, CLI, and
 curriculum are stable; see the [Roadmap](roadmap.md) for what's next.

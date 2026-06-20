@@ -1,9 +1,9 @@
 # Roadmap
 
-Pythonlings is `v0.3.1`, published on PyPI as `pythonlings`. Install with
+Pythonlings is `v0.4.0`, published on PyPI as `pythonlings`. Install with
 `uvx pythonlings` or `pip install pythonlings`.
 
-## Shipped in v0.3.x
+## Shipped
 
 - 292 exercises across 31 topics.
 - Live Textual editor and automatic checks.

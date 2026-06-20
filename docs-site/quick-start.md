@@ -1,6 +1,6 @@
 # Quick Start
 
-> Current release: **v0.3.1** · [PyPI](https://pypi.org/project/pythonlings/)
+> Current release: **v0.4.0** · [PyPI](https://pypi.org/project/pythonlings/)
 
 ## Zero-Install (uvx)
 

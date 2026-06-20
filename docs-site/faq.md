@@ -26,7 +26,7 @@ Yes. All exercises and the bundled local Python reference (press `F5` in the TUI
 
 ## Is Pythonlings on PyPI?
 
-Yes — install it as [`pythonlings`](https://pypi.org/project/pythonlings/) (current release: `v0.3.1`).
+Yes — install it as [`pythonlings`](https://pypi.org/project/pythonlings/) (current release: `v0.4.0`).
 
 ## How do I see the reference answer?
 
