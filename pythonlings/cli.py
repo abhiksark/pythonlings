@@ -104,7 +104,7 @@ def _cmd_init(path: Path, force: bool) -> int:
     except WorkspaceError as e:
         sys.stderr.write(f"pythonlings: {e}\n")
         return 1
-    print(f"Created your workspace at {root}")
+    print(f"Created your workspace at {_display_path(root)}")
     return 0
 
 

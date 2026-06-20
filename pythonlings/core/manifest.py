@@ -50,7 +50,7 @@ def load(root: Path) -> Manifest:
     info_path = root / "info.toml"
     if not info_path.exists():
         raise ManifestError(
-            f"no pythonlings workspace here ({info_path} not found). "
+            f"no pythonlings workspace at {root} (info.toml not found). "
             "Run 'pythonlings init' to create one."
         )
 
