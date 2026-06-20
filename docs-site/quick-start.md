@@ -1,5 +1,7 @@
 # Quick Start
 
+> Current release: **v0.3.1** · [PyPI](https://pypi.org/project/pythonlings/)
+
 ## Zero-Install (uvx)
 
 No installation required — run Pythonlings directly with [uv](https://docs.astral.sh/uv/):
