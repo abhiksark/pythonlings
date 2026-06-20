@@ -9,16 +9,33 @@ docs_dir: docs-site
 theme:
   name: material
   language: en
+  font:
+    text: Inter
+    code: JetBrains Mono
   features:
+    - navigation.instant
     - navigation.sections
     - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - content.tabs.link
     - search.highlight
     - search.suggest
-    - content.code.copy
   palette:
-    - scheme: default
-      primary: blue
-      accent: amber
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
 
 markdown_extensions:
   - admonition
@@ -44,3 +61,6 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/abhiksark/pythonlings
+
+extra_css:
+  - stylesheets/extra.css
