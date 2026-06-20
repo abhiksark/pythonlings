@@ -8,36 +8,41 @@ Set Padding 16
 Set Framerate 16
 Set TypingSpeed 35ms
 
-Type "pythonlings init --path /tmp/pythonlings-demo"
+# Hidden setup: a throwaway HOME so `pythonlings` creates a fresh ~/.pythonlings
+# without touching the real one, from a non-workspace directory so zero-config
+# resolution kicks in. None of this is recorded.
+Hide
+Type 'export HOME=/tmp/pythonlings-demo && rm -rf "$HOME" && mkdir -p "$HOME" && cd "$HOME" && clear'
 Enter
-Sleep 1s
+Sleep 500ms
+Show
 
-Type "cd /tmp/pythonlings-demo"
+# Zero-config: one command creates the workspace and opens the first exercise.
+Type "pythonlings"
 Enter
-Sleep 300ms
+Sleep 3s
 
+# Coding screen -> local Python reference (F5), then close it (Esc)
+Escape
+Type@0ms "[15~"
+Sleep 2s
+Escape
+Sleep 700ms
+
+# Topic picker (F4)
+Escape
+Type@0ms "OS"
+Sleep 1.5s
+
+# Quit back to the shell
+Ctrl+Q
+Sleep 800ms
+
+# There's a CLI too: progress and hints
 Type "pythonlings list"
 Enter
 Sleep 1.5s
 
 Type "pythonlings hint variables1"
 Enter
-Sleep 1.5s
-
-Type "pythonlings"
-Enter
-Sleep 2s
-
-Escape
-Type@0ms "[15~"
-Sleep 2s
-
-Escape
-Sleep 700ms
-
-Escape
-Type@0ms "OS"
-Sleep 1.5s
-
-Ctrl+Q
-Sleep 500ms
+Sleep 1.8s
