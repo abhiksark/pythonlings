@@ -27,7 +27,7 @@ cd learn-python && uvx pythonlings
 How it works: **edit** the broken exercise in the built-in editor → checks
 rerun as you type and advance you to the next one. That's the whole loop.
 
-Status: `v0.3.0`, alpha — published on PyPI as `pythonlings`.
+Status: `v0.3.1`, alpha — published on PyPI as `pythonlings`.
 
 ![Coding screen](docs/assets/screenshots/coding-screen.png)
 
