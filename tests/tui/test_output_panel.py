@@ -126,3 +126,29 @@ async def test_full_hint_toggles_on_f1(tmp_path: Path) -> None:
         panel.toggle_hint("Full hint text.")
         await pilot.pause()
         assert "Full hint text." in str(panel.query_one("#hint", Static).content)
+
+
+@pytest.mark.asyncio
+async def test_show_topic_complete_uses_topic_header_not_global(tmp_path: Path) -> None:
+    app = _Harness()
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        panel = app.query_one(OutputPanel)
+        panel.show_topic_complete("Topic 'variables' complete — press F4 for topics.")
+        await pilot.pause()
+        header = str(panel.query_one("#output-header", Static).content)
+        assert "Topic complete" in header
+        assert "All exercises complete" not in header
+        assert "Topic 'variables' complete" in panel.renderable_text()
+
+
+@pytest.mark.asyncio
+async def test_show_final_keeps_global_header(tmp_path: Path) -> None:
+    app = _Harness()
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        panel = app.query_one(OutputPanel)
+        panel.show_final("🎉 done")
+        await pilot.pause()
+        header = str(panel.query_one("#output-header", Static).content)
+        assert "All exercises complete" in header

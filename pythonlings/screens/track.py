@@ -68,7 +68,7 @@ class TrackScreen(Screen[None]):
         self.current = self._initial_exercise()
         self._render_state()
         if self.current is None:
-            self.query_one(OutputPanel).show_final(
+            self.query_one(OutputPanel).show_topic_complete(
                 f"Topic '{self.topic}' complete."
             )
             return
@@ -198,7 +198,7 @@ class TrackScreen(Screen[None]):
                     celebration_message(len(all_exercises))
                 )
             else:
-                self.query_one(OutputPanel).show_final(
+                self.query_one(OutputPanel).show_topic_complete(
                     f"Topic '{self.topic}' complete — press F4 for topics."
                 )
             return
