@@ -113,12 +113,19 @@ class OutputPanel(Vertical):
         )
 
     def show_final(self, message: str) -> None:
-        """Render the curriculum-complete screen."""
+        """Render the whole-curriculum-complete screen."""
+        self._show_complete("All exercises complete", message)
+
+    def show_topic_complete(self, message: str) -> None:
+        """Render a single-topic-complete screen (not the whole curriculum)."""
+        self._show_complete("Topic complete", message)
+
+    def _show_complete(self, header: str, message: str) -> None:
         self.remove_class("failed", "pending")
         self.add_class("passed")
         self.query_one("#hint", Static).remove_class("visible")
         self.query_one("#output-header", Static).update(
-            "[bold green]All exercises complete[/bold green]"
+            f"[bold green]{header}[/bold green]"
         )
         self.query_one("#goal", Static).update("")
         self.query_one("#docs", Static).update("")
