@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -84,3 +85,12 @@ def next_pending(exercises: list[Exercise], completed: set[str]) -> str | None:
         if ex.name not in completed:
             return ex.name
     return None
+
+
+def completed_count(exercise_names: Iterable[str], completed: set[str]) -> int:
+    """How many of `exercise_names` are completed.
+
+    Counts only names that exist in the curriculum, so stale `completed`
+    entries (e.g. exercises renamed or removed) cannot inflate the total.
+    """
+    return sum(1 for name in exercise_names if name in completed)
