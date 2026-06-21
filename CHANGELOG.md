@@ -3,6 +3,21 @@
 All notable changes to this project are documented here. Pythonlings follows
 Semantic Versioning.
 
+## [0.4.1] - 2026-06-21
+
+### Added
+
+- First-launch welcome screen that explains the edit → save → advance loop and
+  the key shortcuts, shown once on a genuine first run.
+- The TUI progress bar now shows overall curriculum progress alongside the
+  current topic's progress.
+- A celebration screen when every exercise in the curriculum is complete.
+
+### Fixed
+
+- Finishing a single topic no longer shows the whole-curriculum "All exercises
+  complete" header; it now shows a "Topic complete" header.
+
 ## [0.4.0] - 2026-06-20
 
 ### Added
