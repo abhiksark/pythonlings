@@ -3,6 +3,12 @@
 All notable changes to this project are documented here. Pythonlings follows
 Semantic Versioning.
 
+## [Unreleased]
+
+### Added
+
+- Listed in the Rustlings third-party exercises community list.
+
 ## [0.4.1] - 2026-06-21
 
 ### Added
