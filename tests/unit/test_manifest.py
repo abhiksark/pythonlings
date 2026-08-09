@@ -210,3 +210,72 @@ def test_real_curriculum_check_files_parse() -> None:
             exercise.check_path.read_text(encoding="utf-8"),
             filename=str(exercise.check_path),
         )
+
+
+def test_load_rejects_invalid_toml_syntax(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").write_text("format_version = [1\n", encoding="utf-8")
+    with pytest.raises(ManifestError, match="info.toml"):
+        load(tmp_path)
+
+
+def test_load_rejects_missing_name_field(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        'path = "exercises/a.py"\n'
+        'hint = "h"\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ManifestError, match="'name'"):
+        load(tmp_path)
+
+
+def test_load_rejects_wrong_type_name_field(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        "name = 123\n"
+        'path = "exercises/a.py"\n'
+        'hint = "h"\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ManifestError, match="'name'"):
+        load(tmp_path)
+
+
+def test_load_rejects_missing_path_field(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        'name = "a"\n'
+        'hint = "h"\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ManifestError, match="'path'"):
+        load(tmp_path)
+
+
+def test_load_rejects_absolute_path(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        'name = "a"\n'
+        'path = "/etc/passwd"\n'
+        'hint = "h"\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ManifestError, match="under exercises/"):
+        load(tmp_path)
+
+
+def test_load_rejects_traversal_path(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        'name = "a"\n'
+        'path = "exercises/../../etc/passwd"\n'
+        'hint = "h"\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ManifestError, match="under exercises/"):
+        load(tmp_path)

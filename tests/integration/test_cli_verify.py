@@ -64,3 +64,27 @@ def test_verify_reports_manifest_error_with_exit_2(tmp_path: Path) -> None:
     result = _run("--root", str(tmp_path), "verify")
     assert result.returncode == 2
     assert "info.toml" in result.stderr
+
+
+def test_verify_malformed_toml_exits_2_without_traceback(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").write_text("format_version = [1\n", encoding="utf-8")
+    result = _run("--root", str(tmp_path), "verify")
+    assert result.returncode == 2
+    assert "info.toml" in result.stderr
+    assert "Traceback" not in result.stderr
+    assert result.stderr.startswith("pythonlings:")
+
+
+def test_verify_traversal_path_exits_2_without_traceback(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").write_text(
+        'format_version = 1\n'
+        '[[exercises]]\n'
+        'name = "a"\n'
+        'path = "exercises/../../etc/passwd"\n'
+        'hint = "h"\n',
+        encoding="utf-8",
+    )
+    result = _run("--root", str(tmp_path), "verify")
+    assert result.returncode == 2
+    assert "Traceback" not in result.stderr
+    assert result.stderr.startswith("pythonlings:")
