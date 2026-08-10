@@ -214,7 +214,7 @@ def test_real_curriculum_check_files_parse() -> None:
 
 def test_load_rejects_invalid_toml_syntax(tmp_path: Path) -> None:
     (tmp_path / "info.toml").write_text("format_version = [1\n", encoding="utf-8")
-    with pytest.raises(ManifestError, match="info.toml"):
+    with pytest.raises(ManifestError, match=r"info\.toml"):
         load(tmp_path)
 
 
@@ -278,4 +278,31 @@ def test_load_rejects_traversal_path(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     with pytest.raises(ManifestError, match="under exercises/"):
+        load(tmp_path)
+
+
+def test_load_rejects_symlink_escape(tmp_path: Path) -> None:
+    """A path that is lexically clean (no '..', not absolute, starts with
+    exercises/) can still resolve outside the workspace via a symlink, e.g.
+    exercises/link/secret.py where "link" is a symlink to somewhere else.
+    The lexical checks alone don't catch this -- containment must be
+    verified against the *resolved* path.
+    """
+    outside = tmp_path.parent / "outside_workspace"
+    outside.mkdir(exist_ok=True)
+    (outside / "secret.py").write_text("SECRET = 1\n", encoding="utf-8")
+
+    (tmp_path / "exercises").mkdir()
+    (tmp_path / "exercises" / "link").symlink_to(outside, target_is_directory=True)
+    (tmp_path / "checks").mkdir()
+
+    (tmp_path / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        'name = "a"\n'
+        'path = "exercises/link/secret.py"\n'
+        'hint = "h"\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ManifestError, match="escapes the workspace"):
         load(tmp_path)

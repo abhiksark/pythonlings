@@ -102,12 +102,36 @@ def load(root: Path) -> Manifest:
                 f"exercises/, with no '..' components: {raw_path!r}"
             )
         abs_path = root / rel_path
+        # The lexical checks above reject '..' segments and absolute
+        # paths in the *written* path string, but a symlink inside
+        # exercises/ can still resolve outside the workspace even
+        # when the written path looks clean (e.g. exercises/link/a.py
+        # where "link" is a symlink pointing elsewhere). Resolve and
+        # confirm containment before touching the filesystem further.
+        exercises_root = (root / "exercises").resolve()
+        resolved_abs_path = abs_path.resolve()
+        if resolved_abs_path != exercises_root and not resolved_abs_path.is_relative_to(
+            exercises_root
+        ):
+            raise ManifestError(
+                f"exercise {name!r} path escapes the workspace exercises/ "
+                f"directory via a symlink: {raw_path!r}"
+            )
         if not abs_path.exists():
             raise ManifestError(f"exercise path does not exist: {rel_path}")
 
         # Derive the check path: exercises/<...> mirrors to checks/<...>.
         check_rel = Path("checks", *rel_path.parts[1:])
         check_abs = root / check_rel
+        checks_root = (root / "checks").resolve()
+        resolved_check_abs = check_abs.resolve()
+        if resolved_check_abs != checks_root and not resolved_check_abs.is_relative_to(
+            checks_root
+        ):
+            raise ManifestError(
+                f"check path for {name!r} escapes the workspace checks/ "
+                f"directory via a symlink: {check_rel}"
+            )
         if not check_abs.exists():
             raise ManifestError(f"no check file for {name!r}: {check_rel}")
 
