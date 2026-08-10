@@ -1,6 +1,6 @@
 # Roadmap
 
-Pythonlings is `v0.4.0`, published on PyPI as `pythonlings`. Install with
+Pythonlings is `v0.4.1`, published on PyPI as `pythonlings`. Install with
 `uvx pythonlings` or `pip install pythonlings`.
 
 ## Shipped
