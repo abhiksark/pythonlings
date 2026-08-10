@@ -26,7 +26,7 @@ uvx pythonlings
 How it works: **edit** the broken exercise in the built-in editor → checks
 rerun as you type and advance you to the next one. That's the whole loop.
 
-Status: `v0.4.0`, alpha — published on PyPI as `pythonlings`.
+Status: `v0.4.1`, alpha — published on PyPI as `pythonlings`.
 
 ![Coding screen](docs/assets/screenshots/coding-screen.png)
 
@@ -209,7 +209,7 @@ feature/<name> -> dev -> main -> vMAJOR.MINOR.PATCH
 ```
 
 Feature branches are merged into `dev`. A verified `dev` branch is then merged
-into `main` and tagged with an annotated release tag such as `v0.1.0`.
+into `main` and tagged with an annotated release tag such as `vMAJOR.MINOR.PATCH`.
 See [RELEASE.md](RELEASE.md) for the release checklist.
 
 ## Attribution
