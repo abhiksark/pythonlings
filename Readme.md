@@ -189,8 +189,8 @@ together. Keep exercise and check filenames mirrored, for example
 ## Contributing
 
 Pythonlings is actively developed and welcomes contributors — beginners included.
-The current focus is the [0.3.0 roadmap](docs/roadmap/0.3.0.md) (wider adoption),
-and every roadmap issue is written to be picked up cold. Start with a
+The current focus is the [August 2026 Community Dev Sprint](https://github.com/abhiksark/pythonlings/issues/52).
+Start with a
 [`good first issue`](https://github.com/abhiksark/pythonlings/issues?q=is%3Aopen+label%3A%22good+first+issue%22),
 comment to claim it, and see [CONTRIBUTING.md](CONTRIBUTING.md).
 
