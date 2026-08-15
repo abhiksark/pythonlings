@@ -35,7 +35,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
 
     p_update = sub.add_parser("update", help="Update an existing pythonlings workspace.")
-    p_update.add_argument("--path", type=Path, default=default_workspace_root())
+    p_update.add_argument("--path", type=Path, default=None)
 
     sub.add_parser("watch", help="Launch the TUI in watch mode (default).")
     sub.add_parser("topics", help="Launch the TUI on the topic picker.")
@@ -278,8 +278,15 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         root: Path | None = None
-        if args.command in ("init", "update"):
+        update_root: Path | None = None
+        if args.command == "init":
             migrate_legacy_state_dir(Path(args.path))
+        elif args.command == "update":
+            explicit_root = args.path if args.path is not None else args.root
+            update_root = resolve_workspace_root(
+                Path.cwd(), explicit_root, create_if_missing=False
+            ).root
+            migrate_legacy_state_dir(update_root)
         else:
             launches_tui = args.command in (None, "watch", "start", "topics")
             resolved = resolve_workspace_root(
@@ -305,7 +312,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "init":
             return _cmd_init(args.path, args.force)
         if args.command == "update":
-            return _cmd_update(args.path)
+            assert update_root is not None
+            return _cmd_update(update_root)
 
         assert root is not None
         if args.command == "verify":
