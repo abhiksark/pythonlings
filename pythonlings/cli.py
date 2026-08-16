@@ -69,6 +69,10 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_verify.add_argument("topic", nargs="?", help="Verify only this topic.")
 
+    sub.add_parser(
+        "doctor", help="Check the Pythonlings installation and workspace."
+    )
+
     return parser
 
 
@@ -269,6 +273,34 @@ def _cmd_reset(root: Path, name: str, yes: bool) -> int:
     return 0
 
 
+def _cmd_doctor(root: Path, resolution_error: Exception | None = None) -> int:
+    from pythonlings.core.doctor import CheckStatus, run_diagnostics
+
+    report = run_diagnostics(
+        root,
+        package_version=__version__,
+        resolution_error=resolution_error,
+    )
+    print("Pythonlings doctor")
+    print(f"Workspace: {report.root}")
+    print()
+    for check in report.checks:
+        print(f"[{check.status.value}] {check.name}: {check.message}")
+
+    warnings = sum(
+        check.status is CheckStatus.WARNING for check in report.checks
+    )
+    failures = sum(
+        check.status is CheckStatus.FAILURE for check in report.checks
+    )
+    print()
+    print(
+        f"Summary: {len(report.checks)} checks, "
+        f"{warnings} warning(s), {failures} failure(s)"
+    )
+    return 1 if report.has_failures else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv if argv is not None else sys.argv[1:])
@@ -282,18 +314,29 @@ def main(argv: list[str] | None = None) -> int:
             migrate_legacy_state_dir(Path(args.path))
         else:
             launches_tui = args.command in (None, "watch", "start", "topics")
-            resolved = resolve_workspace_root(
-                Path.cwd(), args.root, create_if_missing=launches_tui
-            )
+            try:
+                resolved = resolve_workspace_root(
+                    Path.cwd(), args.root, create_if_missing=launches_tui
+                )
+            except (OSError, RuntimeError) as exc:
+                if args.command == "doctor":
+                    unresolved = args.root if args.root is not None else Path(".")
+                    return _cmd_doctor(unresolved, resolution_error=exc)
+                raise
             root = resolved.root
-            migrate_legacy_state_dir(root)
+            if args.command != "doctor":
+                migrate_legacy_state_dir(root)
             if resolved.created:
                 print(
                     f"Created your workspace at {_display_path(root)} "
                     "(edit in-app, or open that folder in your editor)"
                 )
 
-        if getattr(args, "debug", False) and root is not None:
+        if (
+            getattr(args, "debug", False)
+            and root is not None
+            and args.command != "doctor"
+        ):
             try:
                 (root / ".pythonlings_debug.log").write_text(
                     f"argv={argv if argv is not None else sys.argv[1:]!r}\n",
@@ -322,6 +365,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_solution(root, args.name)
         if args.command == "reset":
             return _cmd_reset(root, args.name, args.yes)
+        if args.command == "doctor":
+            return _cmd_doctor(root)
 
         if args.command in (None, "watch", "start", "topics"):
             start_topic = getattr(args, "topic", None)
