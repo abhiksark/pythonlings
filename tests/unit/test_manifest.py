@@ -218,6 +218,18 @@ def test_load_rejects_invalid_toml_syntax(tmp_path: Path) -> None:
         load(tmp_path)
 
 
+def test_load_rejects_invalid_utf8(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").write_bytes(b"\xff")
+    with pytest.raises(ManifestError, match="valid UTF-8"):
+        load(tmp_path)
+
+
+def test_load_wraps_info_toml_read_errors(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").mkdir()
+    with pytest.raises(ManifestError, match="could not read info.toml"):
+        load(tmp_path)
+
+
 def test_load_rejects_missing_name_field(tmp_path: Path) -> None:
     (tmp_path / "info.toml").write_text(
         "format_version = 1\n"
@@ -305,4 +317,26 @@ def test_load_rejects_symlink_escape(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     with pytest.raises(ManifestError, match="escapes the workspace"):
+        load(tmp_path)
+
+
+def test_load_rejects_check_symlink_escape(tmp_path: Path) -> None:
+    outside = tmp_path.parent / f"{tmp_path.name}_outside_checks"
+    outside.mkdir()
+    (outside / "a.py").write_text("assert True\n", encoding="utf-8")
+
+    (tmp_path / "exercises" / "topic").mkdir(parents=True)
+    (tmp_path / "exercises" / "topic" / "a.py").write_text("", encoding="utf-8")
+    (tmp_path / "checks").mkdir()
+    (tmp_path / "checks" / "topic").symlink_to(outside, target_is_directory=True)
+    (tmp_path / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        'name = "a"\n'
+        'path = "exercises/topic/a.py"\n'
+        'hint = "h"\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ManifestError, match="check path.*escapes the workspace"):
         load(tmp_path)

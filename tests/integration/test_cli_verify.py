@@ -75,6 +75,22 @@ def test_verify_malformed_toml_exits_2_without_traceback(tmp_path: Path) -> None
     assert result.stderr.startswith("pythonlings:")
 
 
+def test_verify_invalid_utf8_exits_2_without_traceback(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").write_bytes(b"\xff")
+    result = _run("--root", str(tmp_path), "verify")
+    assert result.returncode == 2
+    assert "valid UTF-8" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+def test_verify_info_toml_read_error_exits_2_without_traceback(tmp_path: Path) -> None:
+    (tmp_path / "info.toml").mkdir()
+    result = _run("--root", str(tmp_path), "verify")
+    assert result.returncode == 2
+    assert "could not read info.toml" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
 def test_verify_traversal_path_exits_2_without_traceback(tmp_path: Path) -> None:
     (tmp_path / "info.toml").write_text(
         'format_version = 1\n'

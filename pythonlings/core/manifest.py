@@ -54,11 +54,15 @@ def load(root: Path) -> Manifest:
             "Run 'pythonlings init' to create one."
         )
 
-    with info_path.open("rb") as f:
-        try:
+    try:
+        with info_path.open("rb") as f:
             data = tomllib.load(f)
-        except tomllib.TOMLDecodeError as e:
-            raise ManifestError(f"info.toml is not valid TOML: {e}") from e
+    except UnicodeDecodeError as e:
+        raise ManifestError(f"info.toml is not valid UTF-8: {e}") from e
+    except tomllib.TOMLDecodeError as e:
+        raise ManifestError(f"info.toml is not valid TOML: {e}") from e
+    except OSError as e:
+        raise ManifestError(f"could not read info.toml at {info_path}: {e}") from e
 
     if data.get("format_version") != 1:
         raise ManifestError(
