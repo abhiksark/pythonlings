@@ -3,6 +3,24 @@ from pathlib import Path
 from pythonlings.cli import main
 
 
+_STALE_CHECK = "# stale check used to identify the updated workspace\n"
+
+
+def _stale_workspace(root: Path) -> Path:
+    assert main(["init", "--path", str(root)]) == 0
+    check = next((root / "checks").rglob("*.py"))
+    check.write_text(_STALE_CHECK, encoding="utf-8")
+    return check
+
+
+def _assert_updated(check: Path) -> None:
+    assert check.read_text(encoding="utf-8") != _STALE_CHECK
+
+
+def _assert_not_updated(check: Path) -> None:
+    assert check.read_text(encoding="utf-8") == _STALE_CHECK
+
+
 def test_init_command_creates_workspace(tmp_path: Path) -> None:
     target = tmp_path / "learn-python"
 
@@ -102,3 +120,107 @@ def test_update_command_preserves_user_exercises(tmp_path: Path) -> None:
         "__pycache__/\n"
         "*.pyc\n"
     )
+
+
+def test_update_path_takes_precedence_over_root_and_cwd(
+    tmp_path: Path, monkeypatch
+) -> None:
+    cwd = tmp_path / "cwd-ws"
+    root = tmp_path / "root-ws"
+    path = tmp_path / "path-ws"
+    cwd_check = _stale_workspace(cwd)
+    root_check = _stale_workspace(root)
+    path_check = _stale_workspace(path)
+    monkeypatch.chdir(cwd)
+
+    code = main(
+        [
+            "--root",
+            str(root),
+            "update",
+            "--path",
+            str(path),
+        ]
+    )
+
+    assert code == 0
+    _assert_updated(path_check)
+    _assert_not_updated(root_check)
+    _assert_not_updated(cwd_check)
+
+
+def test_update_root_takes_precedence_over_cwd(tmp_path: Path, monkeypatch) -> None:
+    cwd = tmp_path / "cwd-ws"
+    root = tmp_path / "root-ws"
+    cwd_check = _stale_workspace(cwd)
+    root_check = _stale_workspace(root)
+    monkeypatch.chdir(cwd)
+
+    code = main(["--root", str(root), "update"])
+
+    assert code == 0
+    _assert_updated(root_check)
+    _assert_not_updated(cwd_check)
+
+
+def test_bare_update_prefers_current_workspace(tmp_path: Path, monkeypatch) -> None:
+    home = tmp_path / "home-ws"
+    monkeypatch.setenv("PYTHONLINGS_HOME", str(home))
+    home_check = _stale_workspace(home)
+    cwd = tmp_path / "cwd-ws"
+    cwd_check = _stale_workspace(cwd)
+    monkeypatch.chdir(cwd)
+
+    code = main(["update"])
+
+    assert code == 0
+    _assert_updated(cwd_check)
+    _assert_not_updated(home_check)
+
+
+def test_bare_update_uses_home_workspace_outside_workspace(
+    tmp_path: Path, monkeypatch
+) -> None:
+    home = tmp_path / "home-ws"
+    monkeypatch.setenv("PYTHONLINGS_HOME", str(home))
+    home_check = _stale_workspace(home)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    monkeypatch.chdir(outside)
+
+    code = main(["update"])
+
+    assert code == 0
+    _assert_updated(home_check)
+
+
+def test_update_missing_path_fails_without_creating_it(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "missing"
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    monkeypatch.setenv("PYTHONLINGS_HOME", str(target))
+    monkeypatch.chdir(outside)
+
+    code = main(["update"])
+
+    assert code == 1
+    assert "is not a pythonlings workspace" in capsys.readouterr().err
+    assert not target.exists()
+
+
+def test_update_non_workspace_fails_without_modifying_it(
+    tmp_path: Path, capsys
+) -> None:
+    target = tmp_path / "not-a-workspace"
+    target.mkdir()
+    marker = target / "keep.txt"
+    marker.write_text("keep\n", encoding="utf-8")
+
+    code = main(["update", "--path", str(target)])
+
+    assert code == 1
+    assert "is not a pythonlings workspace" in capsys.readouterr().err
+    assert list(target.iterdir()) == [marker]
+    assert marker.read_text(encoding="utf-8") == "keep\n"
