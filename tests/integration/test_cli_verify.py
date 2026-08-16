@@ -104,3 +104,40 @@ def test_verify_traversal_path_exits_2_without_traceback(tmp_path: Path) -> None
     assert result.returncode == 2
     assert "Traceback" not in result.stderr
     assert result.stderr.startswith("pythonlings:")
+
+
+def test_verify_directory_path_exits_2_without_traceback(tmp_path: Path) -> None:
+    (tmp_path / "exercises" / "topic").mkdir(parents=True)
+    (tmp_path / "checks" / "topic").mkdir(parents=True)
+    (tmp_path / "info.toml").write_text(
+        'format_version = 1\n'
+        '[[exercises]]\n'
+        'name = "a"\n'
+        'path = "exercises/topic"\n',
+        encoding="utf-8",
+    )
+
+    result = _run("--root", str(tmp_path), "verify")
+    assert result.returncode == 2
+    assert "exercise path is not a file" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+def test_hint_non_string_field_exits_2_without_traceback(tmp_path: Path) -> None:
+    (tmp_path / "exercises").mkdir()
+    (tmp_path / "exercises" / "a.py").write_text("", encoding="utf-8")
+    (tmp_path / "checks").mkdir()
+    (tmp_path / "checks" / "a.py").write_text("", encoding="utf-8")
+    (tmp_path / "info.toml").write_text(
+        'format_version = 1\n'
+        '[[exercises]]\n'
+        'name = "a"\n'
+        'path = "exercises/a.py"\n'
+        'hint = 1\n',
+        encoding="utf-8",
+    )
+
+    result = _run("--root", str(tmp_path), "hint", "a")
+    assert result.returncode == 2
+    assert "hint" in result.stderr
+    assert "Traceback" not in result.stderr

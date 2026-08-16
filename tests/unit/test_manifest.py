@@ -340,3 +340,123 @@ def test_load_rejects_check_symlink_escape(tmp_path: Path) -> None:
 
     with pytest.raises(ManifestError, match="check path.*escapes the workspace"):
         load(tmp_path)
+
+
+def test_load_rejects_top_level_exercises_symlink_escape(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    outside = tmp_path / "outside_exercises"
+    workspace.mkdir()
+    outside.mkdir()
+    (outside / "a.py").write_text("", encoding="utf-8")
+    (workspace / "exercises").symlink_to(outside, target_is_directory=True)
+    (workspace / "checks").mkdir()
+    (workspace / "checks" / "a.py").write_text("", encoding="utf-8")
+    (workspace / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        'name = "a"\n'
+        'path = "exercises/a.py"\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ManifestError, match="exercises/ directory escapes"):
+        load(workspace)
+
+
+def test_load_rejects_top_level_checks_symlink_escape(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    outside = tmp_path / "outside_checks"
+    workspace.mkdir()
+    outside.mkdir()
+    (outside / "a.py").write_text("", encoding="utf-8")
+    (workspace / "checks").symlink_to(outside, target_is_directory=True)
+    (workspace / "exercises").mkdir()
+    (workspace / "exercises" / "a.py").write_text("", encoding="utf-8")
+    (workspace / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        'name = "a"\n'
+        'path = "exercises/a.py"\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ManifestError, match="checks/ directory escapes"):
+        load(workspace)
+
+
+def test_load_rejects_directory_exercise_path(tmp_path: Path) -> None:
+    (tmp_path / "exercises" / "topic").mkdir(parents=True)
+    (tmp_path / "checks" / "topic").mkdir(parents=True)
+    (tmp_path / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        'name = "a"\n'
+        'path = "exercises/topic"\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ManifestError, match="exercise path is not a file"):
+        load(tmp_path)
+
+
+def test_load_rejects_directory_check_path(tmp_path: Path) -> None:
+    (tmp_path / "exercises" / "topic").mkdir(parents=True)
+    (tmp_path / "exercises" / "topic" / "a.py").write_text("", encoding="utf-8")
+    (tmp_path / "checks" / "topic" / "a.py").mkdir(parents=True)
+    (tmp_path / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        'name = "a"\n'
+        'path = "exercises/topic/a.py"\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ManifestError, match="path is not a file"):
+        load(tmp_path)
+
+
+def test_load_wraps_symlink_resolution_errors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    exercise_path = tmp_path / "exercises" / "a.py"
+    _write_curriculum(tmp_path, "a")
+    original_resolve = Path.resolve
+
+    def fail_exercise_resolution(path: Path, strict: bool = False) -> Path:
+        if path == exercise_path:
+            raise RuntimeError("symlink loop")
+        return original_resolve(path, strict=strict)
+
+    monkeypatch.setattr(Path, "resolve", fail_exercise_resolution)
+
+    with pytest.raises(ManifestError, match="could not resolve exercise path"):
+        load(tmp_path)
+
+
+@pytest.mark.parametrize("field", ["hint", "docs"])
+def test_load_rejects_non_string_exercise_text(tmp_path: Path, field: str) -> None:
+    _write_curriculum(tmp_path, "a")
+    (tmp_path / "info.toml").write_text(
+        "format_version = 1\n"
+        "[[exercises]]\n"
+        'name = "a"\n'
+        'path = "exercises/a.py"\n'
+        f"{field} = 1\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ManifestError, match=field):
+        load(tmp_path)
+
+
+@pytest.mark.parametrize("field", ["welcome_message", "final_message"])
+def test_load_rejects_non_string_manifest_text(tmp_path: Path, field: str) -> None:
+    _write_curriculum(tmp_path, "a")
+    info_path = tmp_path / "info.toml"
+    info_path.write_text(
+        f"{field} = 1\n" + info_path.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ManifestError, match=field):
+        load(tmp_path)
