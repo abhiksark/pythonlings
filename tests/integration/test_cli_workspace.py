@@ -1,5 +1,7 @@
+# tests/integration/test_cli_workspace.py
 from pathlib import Path
 
+from pythonlings.core import curriculum
 from pythonlings.cli import main
 
 
@@ -210,6 +212,18 @@ def test_update_missing_path_fails_without_creating_it(
     assert not target.exists()
 
 
+def test_update_explicit_missing_path_fails_without_creating_it(
+    tmp_path: Path, capsys
+) -> None:
+    target = tmp_path / "missing"
+
+    code = main(["update", "--path", str(target)])
+
+    assert code == 1
+    assert "is not a pythonlings workspace" in capsys.readouterr().err
+    assert not target.exists()
+
+
 def test_update_non_workspace_fails_without_modifying_it(
     tmp_path: Path, capsys
 ) -> None:
@@ -217,10 +231,51 @@ def test_update_non_workspace_fails_without_modifying_it(
     target.mkdir()
     marker = target / "keep.txt"
     marker.write_text("keep\n", encoding="utf-8")
+    legacy = target / ".pylings"
+    legacy.mkdir()
+    legacy_marker = legacy / "state.json"
+    legacy_marker.write_text("keep\n", encoding="utf-8")
+
+    code = main(["--root", str(target), "update"])
+
+    assert code == 1
+    assert "is not a pythonlings workspace" in capsys.readouterr().err
+    assert marker.read_text(encoding="utf-8") == "keep\n"
+    assert legacy_marker.read_text(encoding="utf-8") == "keep\n"
+    assert not (target / ".pythonlings").exists()
+
+
+def test_update_rejects_directory_info_without_modifying_it(
+    tmp_path: Path, capsys
+) -> None:
+    target = tmp_path / "not-a-workspace"
+    info = target / "info.toml"
+    info.mkdir(parents=True)
+    marker = info / "keep.txt"
+    marker.write_text("keep\n", encoding="utf-8")
 
     code = main(["update", "--path", str(target)])
 
     assert code == 1
     assert "is not a pythonlings workspace" in capsys.readouterr().err
-    assert list(target.iterdir()) == [marker]
+    assert list(info.iterdir()) == [marker]
     assert marker.read_text(encoding="utf-8") == "keep\n"
+    assert not (target / "checks").exists()
+
+
+def test_bare_update_rejects_curriculum_source(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "source-workspace"
+    assert main(["init", "--path", str(target)]) == 0
+    local_check = target / "checks" / "local-only.py"
+    local_check.write_text("keep\n", encoding="utf-8")
+
+    monkeypatch.setattr(curriculum, "source_root", lambda: target)
+    monkeypatch.chdir(target)
+
+    code = main(["update"])
+
+    assert code == 1
+    assert "curriculum source" in capsys.readouterr().err
+    assert local_check.read_text(encoding="utf-8") == "keep\n"

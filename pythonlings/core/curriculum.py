@@ -1,3 +1,4 @@
+# pythonlings/core/curriculum.py
 from __future__ import annotations
 
 import shutil
@@ -109,10 +110,14 @@ def init_workspace(path: Path, *, force: bool = False) -> Path:
 
 def update_workspace(path: Path) -> Path:
     path = path.expanduser().resolve()
-    if not (path / "info.toml").exists():
+    if not (path / "info.toml").is_file():
         raise WorkspaceError(f"{path} is not a pythonlings workspace")
 
-    src_root = source_root()
+    src_root = source_root().resolve()
+    if path == src_root:
+        raise WorkspaceError(f"cannot update the curriculum source at {path}")
+
+    migrate_legacy_state_dir(path)
     _copy_path(src_root / "info.toml", path / "info.toml", overwrite=True)
     _copy_path(src_root / "checks", path / "checks", overwrite=True)
     _copy_path(src_root / "solutions", path / "solutions", overwrite=True)

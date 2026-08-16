@@ -286,7 +286,6 @@ def main(argv: list[str] | None = None) -> int:
             update_root = resolve_workspace_root(
                 Path.cwd(), explicit_root, create_if_missing=False
             ).root
-            migrate_legacy_state_dir(update_root)
         else:
             launches_tui = args.command in (None, "watch", "start", "topics")
             resolved = resolve_workspace_root(
