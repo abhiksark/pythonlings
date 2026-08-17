@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import errno
 import json
+import stat
 import sys
 from dataclasses import dataclass
 from enum import Enum
@@ -109,13 +111,23 @@ def _check_package_version(package_version: str) -> CheckResult:
 
 
 def _check_workspace(root: Path) -> CheckResult:
-    if not root.exists():
-        return CheckResult(
-            "Workspace",
-            CheckStatus.FAILURE,
-            f"{root} does not exist; run `pythonlings init --path {root}`",
-        )
-    if not root.is_dir():
+    try:
+        mode = root.stat().st_mode
+    except OSError as exc:
+        if exc.errno == errno.ELOOP:
+            return CheckResult(
+                "Workspace",
+                CheckStatus.FAILURE,
+                f"{root} is a symlink loop; check the path and symlinks",
+            )
+        if exc.errno in (errno.ENOENT, errno.ENOTDIR):
+            return CheckResult(
+                "Workspace",
+                CheckStatus.FAILURE,
+                f"{root} does not exist; run `pythonlings init --path {root}`",
+            )
+        raise
+    if not stat.S_ISDIR(mode):
         return CheckResult(
             "Workspace", CheckStatus.FAILURE, f"{root} is not a directory"
         )
