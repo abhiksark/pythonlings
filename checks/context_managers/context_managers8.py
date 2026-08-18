@@ -8,7 +8,7 @@ assert r.release_log == ["released"], (
 with ManagedPool(r) as res2:
     pass
 
-assert r.acquired is False
+assert r.acquired is False, "resource should be released after the second with-block"
 assert r.release_log == ["released", "released"], (
     f"release_log should have two entries after two uses, got {r.release_log!r}"
 )
