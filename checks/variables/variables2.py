@@ -1,3 +1,4 @@
+# checks/variables/variables2.py
 sum_ab = a + b
 diff_ab = a - b
 product_ab = a * b
@@ -12,8 +13,8 @@ assert isinstance(c, str), "c should be a string"
 assert sum_ab == 13, "sum_ab should be 13"
 assert diff_ab == 7, "diff_ab should be 7"
 assert product_ab == 30, "product_ab should be 30"
-assert quotient_ab == 3.3333333333333335
-assert remainder_ab == 1
-assert sum_ac == "10hello"
-assert product_ac == "hellohellohello"
+assert quotient_ab == 3.3333333333333335, "quotient_ab should be 10 / 3"
+assert remainder_ab == 1, "remainder_ab should be 10 % 3"
+assert sum_ac == "10hello", "sum_ac should be str(a) + c"
+assert product_ac == "hellohellohello", "product_ac should be c * b"
 print("variables2 ✓")
