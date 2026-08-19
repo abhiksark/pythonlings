@@ -1,9 +1,10 @@
-assert average(2, 4) == 3, f"average(2, 4) should return 3, got {average(2, 4)!r}"
-assert average(10, 20) == 15, f"average(10, 20) should return 15, got {average(10, 20)!r}"
-assert average(-2, -4) == -3, f"average(-2, -4) should return -3, got {average(-2, -4)!r}"
-assert average(-10, -20) == -15, f"average(-10, -20) should return -15, got {average(-10, -20)!r}"
-assert average(1.5, 2.5) == 2, f"average(1.5, 2.5) should return 2, got {average(1.5, 2.5)!r}"
-assert average(0.5, 1.5) == 1, f"average(0.5, 1.5) should return 1, got {average(0.5, 1.5)!r}"
-assert average(0, 0) == 0, f"average(0, 0) should return 0, got {average(0, 0)!r}"
-assert average(3, 4.5) == 3.75, f"average(3, 4.5) should return 3.75, got {average(3, 4.5)!r}"
+# checks/functions/functions1.py
+assert average(2, 4) == 3, "average(2, 4) should return 3"
+assert average(10, 20) == 15, "average(10, 20) should return 15"
+assert average(-2, -4) == -3, "average(-2, -4) should return -3"
+assert average(-10, -20) == -15, "average(-10, -20) should return -15"
+assert average(1.5, 2.5) == 2, "average(1.5, 2.5) should return 2"
+assert average(0.5, 1.5) == 1, "average(0.5, 1.5) should return 1"
+assert average(0, 0) == 0, "average(0, 0) should return 0"
+assert average(3, 4.5) == 3.75, "average(3, 4.5) should return 3.75"
 print("functions1 ✓")

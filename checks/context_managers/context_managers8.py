@@ -1,3 +1,4 @@
+# checks/context_managers/context_managers8.py
 assert in_block_acquired is True, "resource should be acquired inside the with-block"
 assert r.acquired is False, "resource should be released after the with-block"
 assert r.release_log == ["released"], (
