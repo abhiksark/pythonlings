@@ -1,6 +1,7 @@
 # pythonlings/screens/track.py
 from __future__ import annotations
 
+from textual import events
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal
@@ -17,6 +18,15 @@ from pythonlings.widgets.output_panel import OutputPanel
 from pythonlings.widgets.progress import ProgressBar
 
 _DEBOUNCE_SECONDS = 0.6
+_FULL_FOOTER_WIDTH = 70
+
+
+class _TrackFooter(Footer):
+    def on_resize(self, event: events.Resize) -> None:
+        show_command_palette = event.size.width >= _FULL_FOOTER_WIDTH
+        if self.show_command_palette != show_command_palette:
+            self.show_command_palette = show_command_palette
+            self.call_after_refresh(self.recompose)
 
 
 def celebration_message(total: int) -> str:
@@ -34,12 +44,12 @@ class TrackScreen(Screen[None]):
     """One topic's linear track: editor + output + auto-save loop."""
 
     BINDINGS = [
-        Binding("f1", "toggle_hint", "Hint"),
-        Binding("f2", "reset", "Reset"),
-        Binding("f3", "toggle_list", "List"),
         Binding("f4", "topics", "Topics"),
         Binding("f5", "docs", "Docs"),
         Binding("escape", "quit", "Quit", priority=True),
+        Binding("f1", "toggle_hint", "Hint"),
+        Binding("f2", "reset", "Reset"),
+        Binding("f3", "toggle_list", "List"),
         Binding("ctrl+q", "quit", "Quit"),
     ]
 
@@ -61,7 +71,7 @@ class TrackScreen(Screen[None]):
             OutputPanel(id="output"),
             id="main",
         )
-        yield Footer()
+        yield _TrackFooter()
 
     def on_mount(self) -> None:
         self.app.sub_title = f"topic: {self.topic}"
