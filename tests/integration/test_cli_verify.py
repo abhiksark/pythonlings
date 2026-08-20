@@ -214,6 +214,10 @@ def test_verify_keeps_unicode_symbol_under_utf8(tmp_path: Path) -> None:
         [sys.executable, "-m", "pythonlings", "--root", str(tmp_path), "verify"],
         capture_output=True,
         text=True,
+        # The child writes UTF-8 because of PYTHONIOENCODING above; decode it
+        # the same way rather than falling back to the parent's locale, which
+        # is not UTF-8 on Windows.
+        encoding="utf-8",
         env=env,
     )
 

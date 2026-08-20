@@ -174,7 +174,9 @@ def test_doctor_unknown_home_user_is_friendly() -> None:
 
     assert result.returncode == 1
     assert "[FAIL] Workspace:" in result.stdout
-    assert root in result.stdout
+    # POSIX leaves an unknown ~user unexpanded; Windows expands it to a path
+    # under the users directory. Either way the name has to reach the report.
+    assert "pythonlings_no_such_user_93847" in result.stdout
     assert "check the path and symlinks" in result.stdout
     assert "Traceback" not in result.stdout + result.stderr
 

@@ -95,7 +95,8 @@ def test_load_rejects_missing_exercise_path(tmp_path: Path) -> None:
         'hint = "h"\n',
         encoding="utf-8",
     )
-    with pytest.raises(ManifestError, match="exercises/missing.py"):
+    # The message echoes the path with the platform's separator.
+    with pytest.raises(ManifestError, match=r"exercises[\\/]missing\.py"):
         load(tmp_path)
 
 
