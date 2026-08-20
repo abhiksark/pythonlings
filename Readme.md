@@ -1,6 +1,6 @@
 <!-- Readme.md -->
 <p align="center">
-  <img src="docs/assets/branding/pythonlings-hero.png" alt="Pythonlings: Learn Python by fixing tiny broken programs." width="100%">
+  <img src="docs/assets/branding/pythonlings-banner.gif" alt="Pythonlings: a broken Python exercise is filled in, its I AM NOT DONE marker is removed, and its checks pass." width="100%">
 </p>
 
 <p align="center">
