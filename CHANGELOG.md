@@ -4,6 +4,34 @@
 All notable changes to this project are documented here. Pythonlings follows
 Semantic Versioning.
 
+## [0.4.3] - 2026-08-20
+
+### Added
+
+- `pythonlings doctor` reports a read-only diagnostic across the interpreter,
+  package metadata, workspace layout, manifest, reference solutions, progress
+  state, reset snapshots, and bundled documentation.
+- An Exercise Proposals discussion form, so anyone can propose a new exercise
+  without needing issue-tracker permissions.
+- Community links for the BangPypers Discord and GitHub Discussions.
+- Curriculum conventions are now documented in `CONTRIBUTING.md`: the
+  five-artifact sync, the completion marker's semantics, and the rules for
+  writing checks.
+
+### Changed
+
+- Refreshed the project branding, and replaced the static Readme hero with an
+  animated banner that performs the exercise loop it describes.
+- Added actionable failure messages to 58 assertions across 20 check files, so
+  a failing exercise explains what was expected instead of raising a bare
+  `AssertionError`.
+- Continuous integration now runs on Python 3.9 and 3.10 as well, matching the
+  versions the package declares support for, and runs on pushes to `dev`.
+
+### Fixed
+
+- Package metadata now records the author and maintainer.
+
 ## [0.4.2] - 2026-08-17
 
 ### Changed
