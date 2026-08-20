@@ -15,7 +15,19 @@ from textual.widgets import Markdown, Static
 from pythonlings.core.docs import load_snippet
 from pythonlings.core.exercise import Exercise
 
-_NARROW_SCREEN_WIDTH = 40
+_LONG_FOOTER_TEXT = "O Open official docs | Esc Close"
+_COMPACT_FOOTER_TEXT = "Esc Close | O Docs"
+
+
+class _DocsFooter(Static):
+    def on_resize(self, event: events.Resize) -> None:
+        self.update(self.text_for_width(event.size.width))
+
+    @staticmethod
+    def text_for_width(width: int) -> str:
+        if width < len(_LONG_FOOTER_TEXT):
+            return _COMPACT_FOOTER_TEXT
+        return _LONG_FOOTER_TEXT
 
 
 class DocsScreen(ModalScreen[None]):
@@ -37,20 +49,9 @@ class DocsScreen(ModalScreen[None]):
                 Markdown(self._reference_markdown(), id="docs-content", open_links=False),
                 id="docs-scroll",
             ),
-            Static(self._footer_text(self.app.size.width), id="docs-footer"),
+            _DocsFooter(_COMPACT_FOOTER_TEXT, id="docs-footer"),
             id="docs-window",
         )
-
-    def on_resize(self, event: events.Resize) -> None:
-        self.query_one("#docs-footer", Static).update(
-            self._footer_text(event.size.width)
-        )
-
-    @staticmethod
-    def _footer_text(width: int) -> str:
-        if width <= _NARROW_SCREEN_WIDTH:
-            return "Esc Close | O Open docs"
-        return "O Open official docs | Esc Close"
 
     def action_close(self) -> None:
         self.dismiss()

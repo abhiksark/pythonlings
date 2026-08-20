@@ -22,10 +22,28 @@ _FULL_FOOTER_WIDTH = 70
 
 
 class _TrackFooter(Footer):
+    def __init__(self) -> None:
+        super().__init__()
+        self._prioritize_navigation = False
+
+    def compose(self) -> ComposeResult:
+        children = list(super().compose())
+        if self._prioritize_navigation:
+            priority = {"topics": 0, "docs": 1, "quit": 2}
+            children.sort(
+                key=lambda child: priority.get(getattr(child, "action", ""), 3)
+            )
+        yield from children
+
     def on_resize(self, event: events.Resize) -> None:
         show_command_palette = event.size.width >= _FULL_FOOTER_WIDTH
-        if self.show_command_palette != show_command_palette:
+        prioritize_navigation = not show_command_palette
+        if (
+            self.show_command_palette != show_command_palette
+            or self._prioritize_navigation != prioritize_navigation
+        ):
             self.show_command_palette = show_command_palette
+            self._prioritize_navigation = prioritize_navigation
             self.call_after_refresh(self.recompose)
 
 
@@ -44,12 +62,12 @@ class TrackScreen(Screen[None]):
     """One topic's linear track: editor + output + auto-save loop."""
 
     BINDINGS = [
-        Binding("f4", "topics", "Topics"),
-        Binding("f5", "docs", "Docs"),
-        Binding("escape", "quit", "Quit", priority=True),
         Binding("f1", "toggle_hint", "Hint"),
         Binding("f2", "reset", "Reset"),
         Binding("f3", "toggle_list", "List"),
+        Binding("f4", "topics", "Topics"),
+        Binding("f5", "docs", "Docs"),
+        Binding("escape", "quit", "Quit", priority=True),
         Binding("ctrl+q", "quit", "Quit"),
     ]
 

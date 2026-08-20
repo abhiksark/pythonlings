@@ -210,7 +210,13 @@ async def test_normal_width_footer_keeps_all_track_labels(tmp_path: Path) -> Non
     async with app.run_test(size=(80, 24)) as pilot:
         await _settle(pilot)
         footer = app.screen.query_one(Footer)
-        keys = {key.key: key for key in footer.query("FooterKey")}
+        footer_keys = list(footer.query("FooterKey"))
+        keys = {key.key: key for key in footer_keys}
+        assert [
+            key.key
+            for key in footer_keys
+            if key.key in {"f1", "f2", "f3", "f4", "f5", "escape"}
+        ] == ["f1", "f2", "f3", "f4", "f5", "escape"]
         assert keys["ctrl+p"].description == "palette"
         assert {
             key_name: keys[key_name].description
@@ -226,6 +232,24 @@ async def test_normal_width_footer_keeps_all_track_labels(tmp_path: Path) -> Non
         assert all(
             key.region.right <= footer.region.right for key in keys.values()
         )
+
+
+@pytest.mark.asyncio
+async def test_docs_footer_uses_its_laid_out_width_at_41_columns(
+    tmp_path: Path,
+) -> None:
+    app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
+    async with app.run_test(size=(41, 15)) as pilot:
+        await _settle(pilot)
+        await pilot.press("f5")
+        await pilot.pause()
+        assert isinstance(app.screen, DocsScreen)
+
+        docs_footer = app.screen.query_one("#docs-footer", Static)
+        footer_text = str(docs_footer.content)
+        assert docs_footer.size.width == 23
+        assert footer_text == "Esc Close | O Docs"
+        assert len(footer_text) <= docs_footer.size.width
 
 
 @pytest.mark.asyncio
