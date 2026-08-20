@@ -1,6 +1,6 @@
 <!-- Readme.md -->
 <p align="center">
-  <img src="docs/assets/branding/pythonlings-hero.png" alt="Pythonlings: Learn Python by fixing tiny broken programs." width="100%">
+  <img src="docs/assets/branding/pythonlings-banner.gif" alt="Pythonlings: a broken Python exercise is filled in, its I AM NOT DONE marker is removed, and its checks pass." width="100%">
 </p>
 
 <p align="center">
@@ -199,6 +199,15 @@ beginners. Current work is tracked in the
 Start with a
 [`good first issue`](https://github.com/abhiksark/pythonlings/issues?q=is%3Aopen+label%3A%22good+first+issue%22),
 comment to claim it, and see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Have an idea for a new exercise? Open an
+[Exercise Proposal](https://github.com/abhiksark/pythonlings/discussions/new?category=exercise-proposals)
+— a discussion, not an issue, so anyone can file one without waiting for
+permissions.
+
+Contributors coordinate on the BangPypers Discord —
+[join here](https://discord.gg/JVrYn5fH2) — and in
+[GitHub Discussions](https://github.com/abhiksark/pythonlings/discussions).
 
 ## Release Flow
 
