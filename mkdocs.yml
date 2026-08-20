@@ -1,3 +1,4 @@
+# mkdocs.yml
 site_name: Pythonlings
 site_url: https://pythonlings.abhik.ai/
 site_description: Python learnings, Rustlings-style, in a terminal TUI.
@@ -9,8 +10,8 @@ docs_dir: docs-site
 theme:
   name: material
   language: en
-  logo: assets/logo.svg
-  favicon: assets/favicon.svg
+  logo: assets/logo.png
+  favicon: assets/favicon.png
   font:
     text: Inter
     code: JetBrains Mono

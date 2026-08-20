@@ -1,3 +1,4 @@
+<!-- RELEASE.md -->
 # Release Checklist
 
 Pythonlings follows Semantic Versioning. Use full `MAJOR.MINOR.PATCH` versions in
@@ -27,10 +28,10 @@ pythonlings --root "$tmp" solution variables1
 pythonlings --root "$tmp" reset variables1 --yes
 ```
 
-Expected release version for `v0.3.0`:
+Confirm that the command reports the version represented by the release tag:
 
 ```text
-pythonlings 0.3.0
+pythonlings MAJOR.MINOR.PATCH
 ```
 
 ## Tag And Publish

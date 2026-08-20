@@ -1,0 +1,55 @@
+<!-- docs/assets/branding/pythonlings-hero-source.html -->
+<!-- Source for pythonlings-hero.png. Regenerate from this directory with:
+     google-chrome --headless=new --hide-scrollbars --force-device-scale-factor=2 \
+       --window-size=1280,640 --virtual-time-budget=8000 \
+       --screenshot=pythonlings-hero.png "file://$PWD/pythonlings-hero-source.html" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap">
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 1280px; height: 640px; overflow: hidden;
+    background: #0B1117;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .wrap {
+    box-sizing: border-box;
+    width: 1280px; height: 640px;
+    position: relative;
+    display: flex; flex-direction: row; align-items: center; justify-content: center;
+  }
+  .col { display: flex; flex-direction: column; gap: 26px; transform: translateX(-80px); }
+  .shell { display: flex; flex-direction: column; gap: 14px; font-size: 22px; }
+  .shell .prompt { color: #4ADE80; }
+  .shell .dim { color: #9AA7B4; }
+  .shell .cmd { color: #E2E8F0; }
+  .status { display: flex; gap: 28px; }
+  .status .pass { color: #4ADE80; }
+  .status .cur { color: #FFD43B; }
+  .status .count { color: #46566A; }
+  .wordmark { font-size: 88px; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; }
+  .wordmark .py { color: #5EA3D9; }
+  .wordmark .lings { color: #FFD43B; }
+  .wordmark .cursor { display: inline-block; width: 34px; height: 72px; background: #4ADE80; margin-left: 14px; }
+  .tagline { font-size: 24px; color: #8A97A5; }
+  .mascot { height: 300px; width: auto; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); opacity: 0.95; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="col">
+    <div class="shell">
+      <div><span class="prompt">$</span> <span class="dim">pip install pythonlings</span></div>
+      <div><span class="prompt">$</span> <span class="cmd">pythonlings</span></div>
+      <div class="status"><span class="pass">&#10003; variables1</span><span class="pass">&#10003; variables2</span><span class="cur">&#9679; variables3</span><span class="count">2/292</span></div>
+    </div>
+    <div class="wordmark"><span class="py">python</span><span class="lings">lings</span><span class="cursor"></span></div>
+    <div class="tagline">Learn Python by fixing tiny broken programs.</div>
+  </div>
+  <img class="mascot" src="pythonlings-mascot.png" alt="">
+</div>
+</body>
+</html>

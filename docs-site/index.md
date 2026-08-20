@@ -2,6 +2,7 @@
 hide:
   - toc
 ---
+<!-- docs-site/index.md -->
 
 <div class="pl-hero" markdown>
   <div class="pl-eyebrow">Rustlings for Python</div>
@@ -38,5 +39,7 @@ Prefer a permanent install? See [Quick Start](quick-start.md) for `pipx`, `uv to
 
 ## Project status
 
-Pythonlings is `v0.4.0`, published on PyPI as `pythonlings`. The learner loop, CLI, and
-curriculum are stable; see the [Roadmap](roadmap.md) for what's next.
+Pythonlings is published on PyPI as `pythonlings`. The learner loop, CLI, and
+curriculum are stable; see the [Roadmap](roadmap.md) and
+[open issue tracker](https://github.com/abhiksark/pythonlings/issues?q=is%3Aissue+is%3Aopen)
+for current work.

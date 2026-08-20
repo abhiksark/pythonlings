@@ -1,3 +1,4 @@
+# docs/demo.tape
 Output docs/assets/demos/pythonlings-demo.gif
 
 Set Shell "bash"
@@ -21,6 +22,10 @@ Show
 Type "pythonlings"
 Enter
 Sleep 3s
+
+# Dismiss first-run onboarding, then let the coding screen settle.
+Enter
+Sleep 500ms
 
 # Coding screen -> local Python reference (F5), then close it (Esc)
 Escape

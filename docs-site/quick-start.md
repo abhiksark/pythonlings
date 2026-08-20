@@ -1,6 +1,7 @@
+<!-- docs-site/quick-start.md -->
 # Quick Start
 
-> Current release: **v0.4.0** · [PyPI](https://pypi.org/project/pythonlings/)
+> Latest release: [pythonlings on PyPI](https://pypi.org/project/pythonlings/)
 
 ## Zero-Install (uvx)
 

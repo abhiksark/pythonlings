@@ -1,10 +1,11 @@
+# pyproject.toml
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
 name = "pythonlings"
-version = "0.4.1"
+version = "0.4.2"
 description = "Python learnings, Rustlings-style, in a terminal TUI."
 readme = "Readme.md"
 requires-python = ">=3.9"

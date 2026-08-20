@@ -1,3 +1,4 @@
+<!-- docs-site/roadmap.md -->
 # Roadmap
 
 Pythonlings is `v0.4.1`, published on PyPI as `pythonlings`. Install with
@@ -11,13 +12,12 @@ Pythonlings is `v0.4.1`, published on PyPI as `pythonlings`. Install with
 - Bundled Python docs snippets with official docs links.
 - Published on PyPI as `pythonlings`; canonical install is `uvx pythonlings`.
 
-## Next Work
+## Active Work
 
-- Improve first-run onboarding and empty-state copy.
-- Harden keyboard flow around `Enter`, `Esc`, `F4`, and `F5`.
-- Add more TUI tests for the coding screen, docs window, and topic picker.
-- Add a release smoke test that installs the built wheel and exercises the CLI.
-- Continue auditing exercises for clearer hints and stronger hidden checks.
+Current priorities and ready-to-pick-up tasks are maintained in the
+[open issue tracker](https://github.com/abhiksark/pythonlings/issues?q=is%3Aissue+is%3Aopen).
+New contributors can start with the
+[`good first issue` label](https://github.com/abhiksark/pythonlings/issues?q=is%3Aopen+label%3A%22good+first+issue%22).
 
 ## Release Policy
 

@@ -1,3 +1,4 @@
+# pythonlings/core/curriculum.py
 from __future__ import annotations
 
 import shutil
@@ -59,10 +60,23 @@ def _copy_path(src: Path, dst: Path, *, overwrite: bool) -> None:
 
 
 def _write_workspace_gitignore(root: Path) -> None:
-    (root / ".gitignore").write_text(
-        "\n".join(GITIGNORE_LINES) + "\n",
-        encoding="utf-8",
-    )
+    gitignore = root / ".gitignore"
+    if gitignore.exists():
+        with gitignore.open(encoding="utf-8", newline="") as file:
+            existing = file.read()
+    else:
+        existing = ""
+
+    existing_lines = set(existing.splitlines())
+    missing_lines = [line for line in GITIGNORE_LINES if line not in existing_lines]
+    if not missing_lines:
+        return
+
+    line_ending = "\r\n" if "\r\n" in existing else "\n"
+    with gitignore.open("a", encoding="utf-8", newline="") as file:
+        if existing and not existing.endswith(("\n", "\r")):
+            file.write(line_ending)
+        file.write(line_ending.join(missing_lines) + line_ending)
 
 
 def _sync_originals(root: Path, src_root: Path) -> None:
@@ -96,10 +110,14 @@ def init_workspace(path: Path, *, force: bool = False) -> Path:
 
 def update_workspace(path: Path) -> Path:
     path = path.expanduser().resolve()
-    if not (path / "info.toml").exists():
+    if not (path / "info.toml").is_file():
         raise WorkspaceError(f"{path} is not a pythonlings workspace")
 
-    src_root = source_root()
+    src_root = source_root().resolve()
+    if path == src_root:
+        raise WorkspaceError(f"cannot update the curriculum source at {path}")
+
+    migrate_legacy_state_dir(path)
     _copy_path(src_root / "info.toml", path / "info.toml", overwrite=True)
     _copy_path(src_root / "checks", path / "checks", overwrite=True)
     _copy_path(src_root / "solutions", path / "solutions", overwrite=True)

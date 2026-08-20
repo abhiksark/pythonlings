@@ -1,7 +1,25 @@
+<!-- CHANGELOG.md -->
 # Changelog
 
 All notable changes to this project are documented here. Pythonlings follows
 Semantic Versioning.
+
+## [0.4.2] - 2026-08-17
+
+### Changed
+
+- Refreshed the project branding, screenshots, terminal demo, and contributor
+  guidance.
+
+### Fixed
+
+- `pythonlings update` now prefers the current workspace while preserving the
+  precedence of an explicit `--path` and global `--root`. Missing and invalid
+  targets fail without being created or modified.
+- Invalid, unreadable, and unsafe manifests now produce contextual command-line
+  errors without Python tracebacks.
+- Workspace initialization and updates preserve custom `.gitignore` entries,
+  ordering, line endings, and repeated-run idempotency.
 
 ## [0.4.1] - 2026-06-21
 

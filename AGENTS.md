@@ -1,29 +1,102 @@
-# Repository Guidelines
+<!-- AGENTS.md -->
+# AGENTS.md
 
-## Project Structure & Module Organization
+## Scope
 
-`pythonlings/` contains the installable application package. Core exercise loading, workspace setup, state, reset, solutions, and runner logic live in `pythonlings/core/`; CLI entry points are in `pythonlings/cli.py` and `pythonlings/__main__.py`; Textual screens/widgets live in `pythonlings/screens/` and `pythonlings/widgets/`; `pythonlings/pythonlings.tcss` holds TUI styles.
+This guide applies to the entire repository. It is the canonical operational
+policy for contributors and coding agents.
 
-Curriculum files are split between `exercises/<topic>/<exercise>.py` for learner code, `checks/<topic>/<exercise>.py` for hidden assertions, and `solutions/<exercise>.py` for reference answers. Keep these trees aligned with `info.toml`, which defines order, hints, and docs URLs. Tests live in `tests/unit/`, `tests/integration/`, and `tests/tui/`, with fixtures in `tests/fixtures/`.
+- Before editing `docs-site/**`, also read `docs-site/AGENTS.md`.
+- Before editing `pythonlings/docs/**` or its generator, also read
+  `pythonlings/docs/AGENTS.md`.
+- Nested guides add local requirements; this root guide still applies.
+- Treat `.pythonlings/` as ignored learner runtime state, not repository source.
 
-## Build, Test, and Development Commands
+## Supported Commands
 
-- `pip install -e ".[dev]"`: install pythonlings locally with pytest dependencies.
-- `pythonlings init --path ./learn-python`: create a self-contained learner workspace.
-- `pythonlings`, `pythonlings topics`, `pythonlings list`: launch the TUI or inspect progress.
-- `pythonlings run variables1`, `pythonlings dry-run variables1`, `pythonlings solution variables1`: test exercise and solution flows.
-- `pythonlings --root tests/fixtures/passing_curriculum verify`: smoke-test a known passing fixture.
-- `python -m pytest -q`: run the full suite configured in `pyproject.toml`.
-- `python -m build`: build source and wheel distributions.
+Run commands from the repository root.
 
-## Coding Style & Naming Conventions
+- Install development dependencies: `python -m pip install -e ".[dev]"`
+- Run a targeted test: `python -m pytest tests/unit/test_runner.py -q`
+- Run the full suite: `python -m pytest -q`
+- Verify a passing curriculum:
+  `pythonlings --root tests/fixtures/passing_curriculum verify`
+- Install the packaging frontend: `python -m pip install build`
+- Build the source and wheel distributions: `python -m build`
 
-Use Python 3.11+ idioms and 4-space indentation. Prefer small, typed functions where practical. Keep UI behavior in `screens` or `widgets`; keep filesystem, manifest, reset, and runner behavior in `core`. Name tests `test_<behavior>.py` and test functions `test_<expected_behavior>`. Curriculum names use topic plus ordinal, such as `variables1.py` or `collections10.py`.
+## Pull Request Validation
 
-## Testing Guidelines
+Every pull request must run:
 
-Use pytest for all tests; async tests are supported by `pytest-asyncio` in auto mode. Add unit tests for core behavior, integration tests for CLI/workspace flows, and TUI tests for Textual interactions. When changing curriculum, update `exercises/`, `checks/`, `solutions/`, and `info.toml`, then run relevant pytest files plus `pythonlings --root tests/fixtures/passing_curriculum verify`.
+- `python -m pytest -q`
+- `pythonlings --root tests/fixtures/passing_curriculum verify`
 
-## Commit & Pull Request Guidelines
+Add the checks that match the change:
 
-Recent history uses conventional prefixes such as `feat:`, `fix:`, `docs:`, `chore:`, and merge commits between `feature/*`, `dev`, and `main`. Keep commits focused and imperative, for example `fix: reset exercise originals`. Pull requests should explain the user-facing change, list tests run, link issues when applicable, and include screenshots or terminal output for TUI/CLI changes.
+- Packaging, curriculum, or workspace changes: install `build`, run
+  `python -m build`, run
+  `python -m pip install --force-reinstall dist/pythonlings-*.whl`, and exercise
+  the relevant installed flow.
+- CLI changes: run the relevant tests under `tests/integration/` and include
+  representative command output.
+- TUI changes: run the relevant tests under `tests/tui/` and include current
+  screenshots or GIFs of the affected flow.
+- Documentation changes: follow the applicable nested `AGENTS.md`.
+
+Record the exact commands and their results in the pull request description.
+
+## Branch and Merge Policy
+
+- Follow `CONTRIBUTING.md` for branch naming, pull request content, and the
+  contributor workflow.
+- Branch from the current `dev` using `feature/<name>` or `fix/<name>`, and
+  target pull requests to `dev`.
+- Keep pull requests in draft until local validation is complete and recorded.
+- Squash-merge feature and fix pull requests into `dev` only after CI passes and
+  review feedback is resolved.
+- Promote a verified `dev` branch to `main` with a merge commit. Do not squash
+  the `dev` to `main` release promotion.
+- Never merge or enable auto-merge without explicit maintainer approval.
+
+## Compatibility and Architecture
+
+- Maintain Python 3.9 compatibility. Guard standard-library APIs introduced in
+  newer Python versions and preserve required fallbacks.
+- Keep Textual imports out of `pythonlings/core/` and one-shot CLI command import
+  paths. Core behavior must remain usable without loading the TUI.
+- Preserve the runner's isolated subprocess, five-second default timeout,
+  shared exercise/check namespace, and `# I AM NOT DONE` completion marker.
+- Preserve atomic state writes and corrupt-state backup. Do not discard learner
+  progress when changing state handling.
+- Preserve learner-edited exercises during workspace updates. Reset snapshots
+  and bundled curriculum updates must not overwrite learner work implicitly.
+
+## Learner and Curriculum Contract
+
+Exercise names and their order in `info.toml` are learner-facing compatibility.
+Avoid renaming, reordering, or removing them without an explicit migration.
+
+For each curriculum change, keep all of these synchronized:
+
+- `exercises/<topic>/<name>.py`
+- the mirrored `checks/<topic>/<name>.py`
+- `solutions/<name>.py`, which is a reference-solution loader
+- the corresponding answer in `solutions/_answers.py`
+- the hint, documentation URL, and ordered manifest entry in `info.toml`
+
+Keep learner exercise files intentionally incomplete with `# I AM NOT DONE`.
+Checks must use bare assertions with actionable, beginner-facing messages. Keep
+curriculum code self-contained because it is copied into learner workspaces.
+
+For changed learner exercises, confirm the marker remains present and run
+`python -m pytest tests/integration/test_solution_verify.py -q` to prove their
+reference solutions pass.
+
+## Security and Releases
+
+- Report vulnerabilities privately. Never disclose them through public issues
+  or pull requests; follow `SECURITY.md`.
+- Use only `pythonlings` as the distribution name. Do not publish or document
+  this repository under a different package name.
+- Read `RELEASE.md` before changing versions, tags, release workflows, or
+  publishing behavior.

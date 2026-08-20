@@ -4,9 +4,9 @@ Welcome! Pythonlings is actively developed and welcomes contributors — beginne
 
 ## Where to start
 
-The current focus is the [August 2026 Community Dev Sprint](https://github.com/abhiksark/pythonlings/issues/52).
-Start with a [`good first issue`](https://github.com/abhiksark/pythonlings/issues?q=is%3Aopen+label%3A%22good+first+issue%22),
-comment to claim it, and read this guide.
+Track current work in the [open issue tracker](https://github.com/abhiksark/pythonlings/issues?q=is%3Aissue+is%3Aopen).
+Find contributor-ready work by label: [`good first issue`](https://github.com/abhiksark/pythonlings/issues?q=is%3Aopen+label%3A%22good+first+issue%22),
+[`help wanted`](https://github.com/abhiksark/pythonlings/issues?q=is%3Aopen+label%3A%22help+wanted%22).
 
 ## Development setup
 

@@ -1,14 +1,19 @@
-# Pythonlings
+```
+<p align="center">
+  <img src="docs/assets/branding/pythonlings-hero.png" alt="Pythonlings: Learn Python by fixing tiny broken programs." width="100%">
+</p>
 
-[![PyPI](https://img.shields.io/pypi/v/pythonlings)](https://pypi.org/project/pythonlings/)
-[![Python](https://img.shields.io/pypi/pyversions/pythonlings)](https://pypi.org/project/pythonlings/)
-[![CI](https://github.com/abhiksark/pythonlings/actions/workflows/ci.yml/badge.svg)](https://github.com/abhiksark/pythonlings/actions/workflows/ci.yml)
-[![Downloads](https://img.shields.io/pypi/dm/pythonlings)](https://pypi.org/project/pythonlings/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
+<p align="center">
+  <a href="https://pypi.org/project/pythonlings/"><img src="https://img.shields.io/pypi/v/pythonlings" alt="PyPI package version"></a>
+  <a href="https://pypi.org/project/pythonlings/"><img src="https://img.shields.io/pypi/pyversions/pythonlings" alt="Supported Python versions"></a>
+  <a href="https://github.com/abhiksark/pythonlings/actions/workflows/ci.yml"><img src="https://github.com/abhiksark/pythonlings/actions/workflows/ci.yml/badge.svg" alt="Continuous integration status"></a>
+  <a href="https://pypi.org/project/pythonlings/"><img src="https://img.shields.io/pypi/dm/pythonlings" alt="Monthly PyPI downloads"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow" alt="MIT license"></a>
+</p>
 
 Documentation: [pythonlings.abhik.ai](https://pythonlings.abhik.ai/)
 
-**Rustlings for Python — learn by fixing 292 tiny broken programs in your terminal.**
+**Learn Python by fixing tiny broken programs.**
 
 Pythonlings helps you learn Python by fixing small broken programs and watching
 checks rerun as you type. It is built for beginner Python practice, coding
@@ -188,8 +193,9 @@ together. Keep exercise and check filenames mirrored, for example
 
 ## Contributing
 
-Pythonlings is actively developed and welcomes contributors — beginners included.
-The current focus is the [August 2026 Community Dev Sprint](https://github.com/abhiksark/pythonlings/issues/52).
+Pythonlings is actively developed and welcomes contributors, including
+beginners. Current work is tracked in the
+[open issue tracker](https://github.com/abhiksark/pythonlings/issues?q=is%3Aissue+is%3Aopen).
 Start with a
 [`good first issue`](https://github.com/abhiksark/pythonlings/issues?q=is%3Aopen+label%3A%22good+first+issue%22),
 comment to claim it, and see [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -222,3 +228,4 @@ licensing details.
 ## License
 
 MIT. See [LICENSE](LICENSE).
+```
