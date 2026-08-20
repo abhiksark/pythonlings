@@ -1,4 +1,5 @@
 # tests/integration/test_cli_topics.py
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -11,6 +12,28 @@ FIXTURES = Path(__file__).parent.parent / "fixtures" / "tiny_curriculum"
 def _run(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, "-m", "pythonlings", *args], capture_output=True, text=True
+    )
+
+
+def _run_ascii(*args: str) -> subprocess.CompletedProcess[str]:
+    """Run the CLI with stdout/stderr pinned to a strict ASCII encoding.
+
+    Setting the encoding explicitly keeps the regression deterministic rather
+    than depending on the locale the suite happens to run under.
+    """
+    env = {
+        **os.environ,
+        "PYTHONIOENCODING": "ascii",
+        "PYTHONUTF8": "0",
+        "PYTHONCOERCECLOCALE": "0",
+        "LC_ALL": "C",
+        "LANG": "C",
+    }
+    return subprocess.run(
+        [sys.executable, "-m", "pythonlings", *args],
+        capture_output=True,
+        text=True,
+        env=env,
     )
 
 
@@ -58,3 +81,23 @@ def test_start_unknown_topic_errors() -> None:
 def test_topics_subcommand_parses() -> None:
     args = _build_parser().parse_args(["topics"])
     assert args.command == "topics"
+
+
+def test_list_completes_under_ascii_encoding() -> None:
+    result = _run_ascii("--root", str(FIXTURES), "list")
+
+    assert result.returncode == 0, result.stderr
+    assert "Traceback" not in result.stderr
+    assert "exercises" in result.stdout
+
+
+def test_list_topic_completes_under_ascii_encoding() -> None:
+    # Per-exercise output renders the current and locked markers, which are the
+    # glyphs a strict-ASCII console cannot encode.
+    result = _run_ascii("--root", str(FIXTURES), "list", "exercises")
+
+    assert result.returncode == 0, result.stderr
+    assert "Traceback" not in result.stderr
+    # Current and locked states stay distinguishable through their stand-ins.
+    assert ">" in result.stdout
+    assert "-" in result.stdout

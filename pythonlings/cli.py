@@ -14,6 +14,44 @@ except PackageNotFoundError:  # running from a source checkout without an instal
     __version__ = "0.0.0+unknown"
 
 
+# Status glyphs, with ASCII stand-ins for consoles whose encoding cannot
+# represent them (a Windows code page, or LC_ALL=C). The fallbacks stay one
+# column wide so aligned output keeps its shape.
+_ASCII_FALLBACK = {"\u2713": "+", "\u2717": "x", "\u25cf": ">", "\U0001f512": "-"}
+
+
+def _encodable(stream: object, text: str) -> bool:
+    encoding = getattr(stream, "encoding", None)
+    if not encoding:
+        return True
+    try:
+        text.encode(encoding)
+    except (UnicodeEncodeError, LookupError):
+        return False
+    return True
+
+
+def _symbol(stream: object, glyph: str) -> str:
+    """Return `glyph`, or an ASCII stand-in the stream can actually encode."""
+    if _encodable(stream, glyph):
+        return glyph
+    return _ASCII_FALLBACK.get(glyph, "?")
+
+
+def _write(stream, text: str) -> None:
+    """Write captured output, degrading characters the encoding cannot represent.
+
+    Check files print their own status line (`print("variables1 \u2713")`), so
+    curriculum output reaches us containing glyphs a strict-ASCII console
+    cannot encode. Losing a glyph is better than a traceback.
+    """
+    try:
+        stream.write(text)
+    except UnicodeEncodeError:
+        encoding = getattr(stream, "encoding", None) or "ascii"
+        stream.write(text.encode(encoding, "replace").decode(encoding, "replace"))
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="pythonlings")
     parser.add_argument("--version", action="version", version=f"pythonlings {__version__}")
@@ -137,10 +175,10 @@ def _cmd_verify(root: Path, topic: str | None) -> int:
         exercises = manifest.exercises
     for ex in exercises:
         result = run_verify(ex)
-        status = "✓" if result.passed else "✗"
+        status = _symbol(sys.stdout, "✓" if result.passed else "✗")
         print(f"{status} {ex.name}")
         if not result.passed:
-            sys.stderr.write(result.stderr or result.stdout)
+            _write(sys.stderr, result.stderr or result.stdout)
             return 1
     return 0
 
@@ -156,7 +194,9 @@ def _cmd_list(root: Path, topic: str | None) -> int:
         for name in manifest.topics():
             exs = manifest.exercises_in(name)
             done = sum(1 for ex in exs if ex.name in state.completed)
-            mark = "✓" if done == len(exs) else ("●" if done else " ")
+            mark = _symbol(sys.stdout, "✓") if done == len(exs) else (
+                _symbol(sys.stdout, "●") if done else " "
+            )
             print(f"  {mark}  {name}  {done}/{len(exs)}")
         return 0
 
@@ -166,11 +206,11 @@ def _cmd_list(root: Path, topic: str | None) -> int:
     current = next_pending(exs, state.completed)
     for ex in exs:
         if ex.name in state.completed:
-            marker = "✓"
+            marker = _symbol(sys.stdout, "✓")
         elif ex.name == current:
-            marker = "●"
+            marker = _symbol(sys.stdout, "●")
         else:
-            marker = "🔒"
+            marker = _symbol(sys.stdout, "🔒")
         print(f"  {marker}  {ex.name}")
     return 0
 
@@ -203,9 +243,9 @@ def _cmd_run(root: Path, name: str) -> int:
 
     result = run_exercise(ex)
     if result.stdout:
-        sys.stdout.write(result.stdout)
+        _write(sys.stdout, result.stdout)
     if result.stderr:
-        sys.stderr.write(result.stderr)
+        _write(sys.stderr, result.stderr)
     if result.timed_out:
         sys.stderr.write(f"pythonlings: {name} timed out after {result.duration_s:.1f}s\n")
         return 1
@@ -236,9 +276,9 @@ def _cmd_solution(root: Path, name: str) -> int:
 
     result = run_verify(ex)
     if result.stdout:
-        sys.stdout.write(result.stdout)
+        _write(sys.stdout, result.stdout)
     if result.stderr:
-        sys.stderr.write(result.stderr)
+        _write(sys.stderr, result.stderr)
     return 0 if result.passed else 1
 
 
