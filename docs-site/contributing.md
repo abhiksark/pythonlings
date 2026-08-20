@@ -1,7 +1,19 @@
 # Contributing
 
-Read `AGENTS.md` for repository conventions and `CONTRIBUTING.md` for the
-contributor workflow.
+Read `AGENTS.md` for repository conventions and
+[CONTRIBUTING.md](https://github.com/abhiksark/pythonlings/blob/main/CONTRIBUTING.md)
+for the contributor workflow.
+
+## Getting involved
+
+- Chat with contributors on the BangPypers Discord —
+  [join here](https://discord.gg/JVrYn5fH2).
+- Ask questions and share ideas in
+  [GitHub Discussions](https://github.com/abhiksark/pythonlings/discussions).
+- Propose a new exercise by opening an
+  [Exercise Proposal](https://github.com/abhiksark/pythonlings/discussions/new?category=exercise-proposals).
+  Proposals are discussions rather than issues, so anyone can file one; a
+  maintainer converts accepted proposals into a scoped issue.
 
 ## Development Setup
 
@@ -31,6 +43,7 @@ Update these together:
 exercises/<topic>/<exercise>.py
 checks/<topic>/<exercise>.py
 solutions/<exercise>.py
+solutions/_answers.py
 info.toml
 ```
 

@@ -200,6 +200,15 @@ Start with a
 [`good first issue`](https://github.com/abhiksark/pythonlings/issues?q=is%3Aopen+label%3A%22good+first+issue%22),
 comment to claim it, and see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+Have an idea for a new exercise? Open an
+[Exercise Proposal](https://github.com/abhiksark/pythonlings/discussions/new?category=exercise-proposals)
+— a discussion, not an issue, so anyone can file one without waiting for
+permissions.
+
+Contributors coordinate on the BangPypers Discord —
+[join here](https://discord.gg/JVrYn5fH2) — and in
+[GitHub Discussions](https://github.com/abhiksark/pythonlings/discussions).
+
 ## Release Flow
 
 Pythonlings uses Semantic Versioning:
