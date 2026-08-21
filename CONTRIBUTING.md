@@ -61,6 +61,16 @@ python -m pytest -q
 
 Supported Python: 3.9+.
 
+### Linting and formatting
+
+Install the development dependencies, then run Ruff before opening a pull
+request:
+
+```bash
+ruff check .
+ruff format --check .
+```
+
 ## Curriculum Changes
 
 Every exercise is five artifacts that must stay in sync:

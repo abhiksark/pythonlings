@@ -58,6 +58,7 @@ Documentation = "https://pythonlings.abhik.ai/"
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
+    "ruff==0.16.4",
 ]
 
 [project.scripts]
@@ -77,3 +78,23 @@ packages = ["pythonlings"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 80
+target-version = "py39"
+include = ["*.py", "*.pyi", "pyproject.toml"]
+extend-exclude = [
+    "exercises",
+    "solutions",
+    "tests/fixtures",
+]
+
+[tool.ruff.lint]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "E501",
+    "F",
+    "I",
+]
