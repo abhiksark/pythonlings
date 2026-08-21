@@ -1,0 +1,314 @@
+<!-- docs/assets/branding/pythonlings-banner-source.html -->
+<!-- Source for pythonlings-banner.gif and pythonlings-hero.png.
+
+     Every frame is a pure function of the ?f= query parameter (0..99), so a
+     capture is reproducible and the 100-frame loop is seamless by construction.
+     Nothing here uses CSS animations or transitions; sampling those with
+     repeated screenshots produces nondeterministic timing.
+
+     Regenerate both assets from the repository root with:
+       scripts/generate_banner.sh
+
+     Capture a single frame by hand from this directory with:
+       google-chrome --headless=new --hide-scrollbars --window-size=1280,520 \
+         --virtual-time-budget=10000 --screenshot=frame.png \
+         "file://$PWD/pythonlings-banner-source.html?f=44"
+-->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=block">
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 1280px; height: 520px; overflow: hidden;
+    background: #0B1117;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    box-sizing: border-box;
+    width: 1280px; height: 520px;
+    padding: 0 56px;
+    display: flex; flex-direction: row; align-items: center; gap: 48px;
+  }
+
+  /* ---------- left: identity ---------- */
+  .left { width: 480px; display: flex; flex-direction: column; }
+  .mascot {
+    height: 210px; width: auto; align-self: flex-start;
+    filter: url(#lift-shadows);
+  }
+  .wordmark {
+    margin-top: 22px;
+    font-size: 62px; font-weight: 800; line-height: 1.15; letter-spacing: -0.03em;
+    white-space: nowrap;
+  }
+  .wordmark .py { color: #5EA3D9; }
+  .wordmark .lings { color: #FFD43B; }
+  .wordmark .cursor {
+    display: inline-block; width: 24px; height: 50px;
+    background: #4ADE80; margin-left: 12px; vertical-align: -7px;
+  }
+  .tagline { margin-top: 14px; font-size: 22px; line-height: 30px; color: #8A97A5; }
+
+  /* ---------- right: the loop ---------- */
+  .right { width: 640px; }
+
+  .strip {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 16px; height: 24px; margin-bottom: 14px;
+  }
+  .strip .items { display: flex; gap: 18px; }
+  .strip .ok { color: #4ADE80; }
+  .strip .cur { color: #FFD43B; }
+  .strip .count { color: #46566A; }
+  .strip .count.flash { color: #4ADE80; }
+
+  .card {
+    position: relative; overflow: hidden;
+    box-sizing: border-box; height: 289px;
+    background: #0F1720;
+    border: 1px solid #1E2A38; border-radius: 10px;
+  }
+  .titlebar {
+    height: 38px; line-height: 38px; padding: 0 18px;
+    font-size: 14px; color: #56697D;
+    border-bottom: 1px solid #1A2532;
+  }
+  .code { padding: 22px 22px; font-size: 22px; }
+  .line { height: 34px; line-height: 34px; white-space: nowrap; overflow: hidden; }
+  .cm { color: #46566A; }
+  .cm-warn { color: #FFD43B; }
+  .var { color: #E2E8F0; }
+  .op { color: #7A8A9A; }
+  .slot.broken {
+    color: #F87171;
+    background: rgba(248, 113, 113, 0.14);
+    border-radius: 4px; padding: 0 4px; margin: 0 -4px;
+  }
+  .slot.num { color: #5EA3D9; }
+  .slot.bool { color: #FFD43B; }
+  .caret {
+    display: inline-block; width: 12px; height: 24px;
+    background: #4ADE80; vertical-align: -4px; margin-left: 2px;
+    visibility: hidden;
+  }
+  /* strike-through drawn as a sized bar so its width is frame-addressable */
+  .strikeable { position: relative; display: inline-block; }
+  .strikeable::after {
+    content: ''; position: absolute; left: 0; top: 50%;
+    height: 2px; width: var(--strike, 0%); background: #F87171;
+  }
+  .sweep {
+    position: absolute; inset: 0; opacity: 0; pointer-events: none;
+    background: linear-gradient(100deg,
+      rgba(74, 222, 128, 0) 42%,
+      rgba(74, 222, 128, 0.24) 50%,
+      rgba(74, 222, 128, 0) 58%);
+  }
+
+  .output { margin-top: 14px; font-size: 18px; height: 26px; line-height: 26px; }
+  .output .err { color: #F87171; }
+  .output .errdim { color: #A05B5B; }
+  .output .run { color: #FFD43B; }
+  .output .ok { color: #4ADE80; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <filter id="lift-shadows" color-interpolation-filters="sRGB">
+    <feComponentTransfer>
+      <feFuncR type="gamma" exponent="0.75"/>
+      <feFuncG type="gamma" exponent="0.75"/>
+      <feFuncB type="gamma" exponent="0.75"/>
+    </feComponentTransfer>
+  </filter>
+</svg>
+
+<div class="wrap">
+
+  <div class="left">
+    <img class="mascot" src="pythonlings-mascot.png" alt="">
+    <div class="wordmark"><span class="py">python</span><span class="lings">lings</span><span class="cursor" id="wmCursor"></span></div>
+    <div class="tagline" id="tagline">Learn Python by fixing<br>tiny broken programs.</div>
+  </div>
+
+  <div class="right">
+    <div class="strip">
+      <div class="items" id="items"></div>
+      <div class="count" id="count">2/292</div>
+    </div>
+
+    <div class="card" id="card">
+      <div class="titlebar">exercises/variables/variables3.py</div>
+      <div class="code" id="code">
+        <div class="line"><span class="cm"># Exercise: Variables 3</span></div>
+        <div class="line" id="markerLine"><span class="cm-warn strikeable" id="markerText"># I AM NOT DONE</span><span class="caret" id="cm"></span></div>
+        <div class="line">&nbsp;</div>
+        <div class="line"><span class="var">count</span> <span class="op">=</span> <span class="slot" id="s0"></span><span class="caret" id="c0"></span></div>
+        <div class="line"><span class="var">ratio</span> <span class="op">=</span> <span class="slot" id="s1"></span><span class="caret" id="c1"></span></div>
+        <div class="line"><span class="var">is_ready</span> <span class="op">=</span> <span class="slot" id="s2"></span><span class="caret" id="c2"></span></div>
+      </div>
+      <div class="sweep" id="sweep"></div>
+    </div>
+
+    <div class="output" id="output"></div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var FRAMES = 100;
+
+  var raw = parseInt(new URLSearchParams(window.location.search).get('f') || '0', 10);
+  if (!isFinite(raw)) raw = 0;
+  var f = Math.max(0, Math.min(FRAMES - 1, raw));
+
+  /* Timeline, in frames at 25fps (100 frames = 4.00s).
+     0-15   broken exercise, caret idling on the first placeholder
+     16-50  the three placeholders are typed over
+     51-55  filled, marker still present
+     56-65  marker struck through, then collapsed away  (the "submit" gesture)
+     66-72  checks run
+     73-88  pass: green sweep, counter ticks 2/292 -> 3/292
+     89-99  cross-fade back to the opening state, completing exactly at frame 0 */
+  var VALUES = [
+    { slot: 's0', clear: 14, start: 16, text: '7',    cls: 'num'  },
+    { slot: 's1', clear: 24, start: 26, text: '0.5',  cls: 'num'  },
+    { slot: 's2', clear: 36, start: 38, text: 'True', cls: 'bool' }
+  ];
+  var FRAMES_PER_CHAR = 3;
+  var STRIKE = [56, 60];
+  var COLLAPSE = [61, 65];
+  var RUNNING = [66, 72];
+  var PASS = 73;
+  var SWEEP = [73, 82];
+  var FADE_OUT = [89, 94];
+  var FADE_IN = [95, 99];
+  var LINE_H = 34;
+
+  /* The closing cross-fade replays the opening state, so content is driven by
+     frame 0 for the fade-in. That makes frame 99 flow into frame 0 with the
+     same opacity step as every other frame of the fade. */
+  var cf = (f >= FADE_IN[0]) ? 0 : f;
+
+  var opacity = 1;
+  if (f >= FADE_OUT[0] && f <= FADE_OUT[1]) opacity = 1 - (f - FADE_OUT[0] + 1) / 6;
+  else if (f >= FADE_IN[0]) opacity = (f - FADE_IN[0] + 1) / 6;
+
+  function lerp(a, b, t) { return Math.round(a + (b - a) * t); }
+  function ramp(frame, span) {
+    if (frame < span[0]) return 0;
+    if (frame > span[1]) return 1;
+    return (frame - span[0] + 1) / (span[1] - span[0] + 1);
+  }
+
+  /* ---------- placeholders and typing ---------- */
+  var typing = false;
+  VALUES.forEach(function (v) {
+    var el = document.getElementById(v.slot);
+    if (cf < v.clear) {
+      el.className = 'slot broken';
+      el.textContent = '???';
+    } else if (cf < v.start) {
+      el.className = 'slot';
+      el.textContent = '';
+    } else {
+      var n = Math.min(v.text.length, Math.floor((cf - v.start) / FRAMES_PER_CHAR) + 1);
+      el.className = 'slot ' + v.cls;
+      el.textContent = v.text.slice(0, n);
+      if (n < v.text.length) typing = true;
+    }
+  });
+  if (cf >= STRIKE[0] && cf <= COLLAPSE[1]) typing = true;
+
+  /* ---------- caret: follows the line being edited, stops blinking while typing ---------- */
+  var caretId = null;
+  if (cf <= 23) caretId = 'c0';
+  else if (cf <= 35) caretId = 'c1';
+  else if (cf <= 55) caretId = 'c2';
+  else if (cf <= COLLAPSE[1]) caretId = 'cm';
+  var caretOn = typing || (((cf + 3) % 20) < 12);
+  ['c0', 'c1', 'c2', 'cm'].forEach(function (id) {
+    document.getElementById(id).style.visibility =
+      (id === caretId && caretOn) ? 'visible' : 'hidden';
+  });
+
+  /* ---------- the marker line: struck through, then collapsed ---------- */
+  document.getElementById('markerText').style.setProperty(
+    '--strike', (ramp(cf, STRIKE) * 100) + '%');
+  var collapse = ramp(cf, COLLAPSE);
+  var markerLine = document.getElementById('markerLine');
+  markerLine.style.height = (LINE_H * (1 - collapse)) + 'px';
+  markerLine.style.opacity = String(1 - collapse);
+
+  /* ---------- pass state ---------- */
+  var passed = cf >= PASS;
+
+  document.getElementById('items').innerHTML =
+    '<span class="ok">&#10003; variables1</span>' +
+    '<span class="ok">&#10003; variables2</span>' +
+    (passed
+      ? '<span class="ok">&#10003; variables3</span><span class="cur">&#9679; variables4</span>'
+      : '<span class="cur">&#9679; variables3</span>');
+
+  var count = document.getElementById('count');
+  count.textContent = passed ? '3/292' : '2/292';
+  count.className = (passed && cf <= PASS + 5) ? 'count flash' : 'count';
+
+  var lastValue = VALUES[VALUES.length - 1];
+  var allTyped = cf >= lastValue.start + (lastValue.text.length - 1) * FRAMES_PER_CHAR;
+
+  var output = document.getElementById('output');
+  if (passed) {
+    output.innerHTML = '<span class="ok">&#10003; variables3 complete</span>';
+  } else if (cf >= RUNNING[0]) {
+    var pulse = (0.4 + 0.6 * Math.abs(Math.sin((cf - RUNNING[0]) * 0.9))).toFixed(2);
+    output.innerHTML = '<span class="run"><span style="opacity:' + pulse +
+      '">&#9679;</span> running checks&#8230;</span>';
+  } else if (allTyped) {
+    output.innerHTML = '<span class="run">&#9679; Checks pass, remove marker</span>';
+  } else {
+    output.innerHTML = '<span class="err">&#10007;</span> ' +
+      '<span class="errdim">SyntaxError: invalid syntax</span>';
+  }
+
+  var sweep = document.getElementById('sweep');
+  if (cf >= SWEEP[0] && cf <= SWEEP[1]) {
+    var t = (cf - SWEEP[0]) / (SWEEP[1] - SWEEP[0]);
+    sweep.style.opacity = '1';
+    sweep.style.transform = 'translateX(' + (-100 + 200 * t) + '%)';
+  } else {
+    sweep.style.opacity = '0';
+  }
+
+  /* Card tint and border decay back to their resting values by frame 81, so
+     the reset at frame 95 has nothing left to snap back. */
+  if (passed) {
+    var d = Math.min(1, (cf - PASS) / 8);
+    var card = document.getElementById('card');
+    card.style.background =
+      'rgb(' + lerp(18, 15, d) + ',' + lerp(40, 23, d) + ',' + lerp(28, 32, d) + ')';
+    card.style.borderColor =
+      'rgb(' + lerp(74, 30, d) + ',' + lerp(222, 42, d) + ',' + lerp(128, 56, d) + ')';
+  }
+
+  /* ---------- fades and the free-running wordmark cursor ---------- */
+  ['items', 'count', 'code', 'output'].forEach(function (id) {
+    document.getElementById(id).style.opacity = opacity.toFixed(3);
+  });
+
+  /* 20-frame period divides 100 evenly, and the phase offset keeps it from
+     blinking in lockstep with the caret. */
+  document.getElementById('wmCursor').style.visibility =
+    (((f + 11) % 20) < 12) ? 'visible' : 'hidden';
+})();
+</script>
+</body>
+</html>

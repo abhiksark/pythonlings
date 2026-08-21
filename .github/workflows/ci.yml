@@ -2,15 +2,36 @@ name: ci
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os }} py${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        # bash on every platform, so the wheel glob and paths below behave the
+        # same way. Git Bash ships on the Windows runners.
+        shell: bash
     strategy:
+      # One platform failing should not hide the others.
+      fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        os: [ubuntu-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        include:
+          # Windows and macOS at the supported floor and ceiling. Console
+          # encoding and path handling are where they diverge from Linux, and
+          # both sit on the CLI's hot path -- a check prints "<name> ✓", so the
+          # curriculum's own output has to survive the console it lands on.
+          # Ubuntu covers the versions in between.
+          - os: windows-latest
+            python-version: "3.9"
+          - os: windows-latest
+            python-version: "3.13"
+          - os: macos-latest
+            python-version: "3.13"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -22,5 +43,13 @@ jobs:
       - run: python -m pip install build
       - run: python -m build
       - run: python -m pip install --force-reinstall dist/*.whl
-      - run: pythonlings init --path /tmp/pythonlings-workspace
-      - run: pythonlings --root /tmp/pythonlings-workspace list
+      - run: pythonlings init --path "${{ runner.temp }}/pythonlings-workspace"
+      - run: pythonlings --root "${{ runner.temp }}/pythonlings-workspace" list
+      - name: CLI survives a non-UTF-8 console
+        # The regression that motivated Windows coverage: status glyphs and
+        # captured check output crashed on consoles that cannot encode them.
+        env:
+          PYTHONIOENCODING: ascii
+        run: |
+          pythonlings --root tests/fixtures/passing_curriculum verify
+          pythonlings --root "${{ runner.temp }}/pythonlings-workspace" list

@@ -141,3 +141,6 @@ dmypy.json
 
 # Docs build venv
 .venv-docs/
+
+# macOS
+.DS_Store

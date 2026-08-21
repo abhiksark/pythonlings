@@ -4,6 +4,18 @@
 Pythonlings is actively developed and **open to contributors** — beginners welcome.
 The fastest way in is a [`good first issue`](https://github.com/abhiksark/pythonlings/issues?q=is%3Aopen+label%3A%22good+first+issue%22).
 
+## Community
+
+- **Chat:** BangPypers hosts the Pythonlings channel on Discord —
+  [join here](https://discord.gg/JVrYn5fH2). Remote contributors coordinate
+  there during dev sprints, and it is the fastest place to ask a question.
+- **Discussions:**
+  [GitHub Discussions](https://github.com/abhiksark/pythonlings/discussions)
+  for questions, ideas, and exercise proposals.
+- **Sprints:** in-person and online sessions are announced as discussions, such
+  as the
+  [August 2026 Community Dev Sprint](https://github.com/abhiksark/pythonlings/discussions/37).
+
 ## Where the work is
 
 - Track current work in the
@@ -20,6 +32,24 @@ The fastest way in is a [`good first issue`](https://github.com/abhiksark/python
 
 No need to wait for a formal assignment; claiming by comment is enough.
 
+## Proposing a new exercise
+
+Have an idea for a tiny broken program — especially one covering newer Python
+features the curriculum does not reach yet? Open an
+[Exercise Proposal](https://github.com/abhiksark/pythonlings/discussions/new?category=exercise-proposals).
+
+Proposals are **discussions, not issues**. Anyone can open one, no permissions
+needed, and nothing lands in the issue tracker until a maintainer converts an
+accepted proposal into a scoped issue that anyone can then claim.
+
+You do not need working code to propose an idea. A clear statement of what the
+learner should come away knowing is enough to start; the form asks for a draft
+exercise, check, and reference solution, but all three are optional.
+
+Before proposing, check the concept is not already covered — `pythonlings list`
+shows every exercise, and [`info.toml`](info.toml) is the manifest in curriculum
+order.
+
 ## Development Setup
 
 ```bash
@@ -33,9 +63,57 @@ Supported Python: 3.9+.
 
 ## Curriculum Changes
 
-Update `info.toml`, `exercises/`, `checks/`, and `solutions/` together. Exercise
-and check paths must mirror each other, and **every exercise must have a passing
-reference solution** (`tests/integration/test_solution_verify.py` enforces this).
+Every exercise is five artifacts that must stay in sync:
+
+```text
+exercises/<topic>/<name>.py   the broken program the learner edits
+checks/<topic>/<name>.py      bare asserts run against it
+solutions/<name>.py           a two-line loader, flat with no topic directory
+solutions/_answers.py         the reference solution itself, keyed by name
+info.toml                     name, path, hint, docs URL, and curriculum order
+```
+
+Only `name` and `path` are recorded in `info.toml`. The check path is derived by
+replacing the first path segment, and the solution is resolved by name alone —
+so moving an exercise between topic directories silently breaks its check, and
+renaming a solution file silently changes which answer runs.
+
+### Writing exercises
+
+- Keep the `# I AM NOT DONE` marker. It gates advancement, and it is a plain
+  substring search over the whole file — a marker inside a string literal keeps
+  the exercise permanently pending.
+- Curriculum code is copied verbatim into every learner workspace, so it must be
+  self-contained and cannot import from the repository.
+- Exercise names and their order in `info.toml` are learner-facing. Renaming or
+  reordering them breaks saved progress.
+
+### Writing checks
+
+- Use bare module-level asserts that read the exercise's names directly. No test
+  function, and never import the exercise — the runner executes both files in
+  one shared namespace.
+- Every assert needs a message stating the **expected value**, not the
+  computation. `"sum_ac should be str(a) + c"` only restates the code;
+  `"sum_ac should be '10hello'"` tells a stuck learner something.
+- Report the actual value where it is cheap, but never re-call the learner's
+  function inside the message — that re-runs their code, which can corrupt call
+  counters or mask the failure.
+- Begin the file with its own path as a comment: `# checks/<topic>/<name>.py`.
+- Keep lines to 80 characters or fewer.
+- End with `print("<name> ✓")`.
+
+### Before opening the pull request
+
+Adding or removing an exercise changes counts pinned in the tests:
+`tests/unit/test_manifest.py` asserts the total exercise count, the topic count,
+and per-topic counts. Update them in the same commit.
+
+```bash
+python -m pytest -q
+pythonlings --root tests/fixtures/passing_curriculum verify
+python -m pytest tests/integration/test_solution_verify.py -q
+```
 
 ## Pull Requests
 
