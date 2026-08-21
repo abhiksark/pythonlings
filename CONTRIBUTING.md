@@ -71,6 +71,10 @@ ruff check .
 ruff format --check .
 ```
 
+Ruff currently runs in advisory mode while existing violations are addressed
+incrementally. New and modified Python files should follow its lint and format
+output.
+
 ## Curriculum Changes
 
 Every exercise is five artifacts that must stay in sync:
