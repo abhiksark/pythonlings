@@ -1,4 +1,7 @@
+# checks/async/async7.py
 import asyncio
 
-assert asyncio.run(with_timeout()) == "done", "with_timeout() should return 'done' within the timeout"
+assert asyncio.run(with_timeout()) == "done", (
+    "with_timeout() should return 'done' within the timeout"
+)
 print("async7 ok")
