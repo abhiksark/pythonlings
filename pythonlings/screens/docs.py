@@ -5,6 +5,7 @@ import webbrowser
 from urllib.parse import urldefrag
 
 from rich.markup import escape
+from textual import events
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical, VerticalScroll
@@ -13,6 +14,20 @@ from textual.widgets import Markdown, Static
 
 from pythonlings.core.docs import load_snippet
 from pythonlings.core.exercise import Exercise
+
+_LONG_FOOTER_TEXT = "O Open official docs | Esc Close"
+_COMPACT_FOOTER_TEXT = "Esc Close | O Docs"
+
+
+class _DocsFooter(Static):
+    def on_resize(self, event: events.Resize) -> None:
+        self.update(self.text_for_width(event.size.width))
+
+    @staticmethod
+    def text_for_width(width: int) -> str:
+        if width < len(_LONG_FOOTER_TEXT):
+            return _COMPACT_FOOTER_TEXT
+        return _LONG_FOOTER_TEXT
 
 
 class DocsScreen(ModalScreen[None]):
@@ -34,7 +49,7 @@ class DocsScreen(ModalScreen[None]):
                 Markdown(self._reference_markdown(), id="docs-content", open_links=False),
                 id="docs-scroll",
             ),
-            Static("O Open official docs | Esc Close", id="docs-footer"),
+            _DocsFooter(_COMPACT_FOOTER_TEXT, id="docs-footer"),
             id="docs-window",
         )
 
