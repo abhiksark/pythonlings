@@ -174,8 +174,12 @@ def test_doctor_unknown_home_user_is_friendly() -> None:
 
     assert result.returncode == 1
     assert "[FAIL] Workspace:" in result.stdout
-    assert root in result.stdout
-    assert "check the path and symlinks" in result.stdout
+    # POSIX leaves an unknown ~user unexpanded, so the path stays literal and
+    # doctor reports it as unresolvable. Windows expands it to a path under the
+    # users directory, which is merely missing. Both are correct, so assert what
+    # holds either way -- a reported failure naming the user -- rather than
+    # pinning one platform's wording.
+    assert "pythonlings_no_such_user_93847" in result.stdout
     assert "Traceback" not in result.stdout + result.stderr
 
 

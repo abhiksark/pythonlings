@@ -114,7 +114,10 @@ def _check_workspace(root: Path) -> CheckResult:
     try:
         mode = root.stat().st_mode
     except OSError as exc:
-        if exc.errno == errno.ELOOP:
+        # Windows reports an unresolvable path (a symlink loop among them) as
+        # ERROR_CANT_RESOLVE_FILENAME with no matching errno, so match on the
+        # winerror too rather than letting it escape.
+        if exc.errno == errno.ELOOP or getattr(exc, "winerror", None) == 1921:
             return CheckResult(
                 "Workspace",
                 CheckStatus.FAILURE,
@@ -126,7 +129,13 @@ def _check_workspace(root: Path) -> CheckResult:
                 CheckStatus.FAILURE,
                 f"{root} does not exist; run `pythonlings init --path {root}`",
             )
-        raise
+        # Anything else is still reported rather than raised: doctor exists to
+        # describe a broken workspace, so it must not crash on one.
+        return CheckResult(
+            "Workspace",
+            CheckStatus.FAILURE,
+            f"{root} could not be read ({exc.strerror or exc})",
+        )
     if not stat.S_ISDIR(mode):
         return CheckResult(
             "Workspace", CheckStatus.FAILURE, f"{root} is not a directory"
