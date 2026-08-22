@@ -1,6 +1,7 @@
 # pythonlings/screens/track.py
 from __future__ import annotations
 
+from textual import events
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal
@@ -17,6 +18,33 @@ from pythonlings.widgets.output_panel import OutputPanel
 from pythonlings.widgets.progress import ProgressBar
 
 _DEBOUNCE_SECONDS = 0.6
+_FULL_FOOTER_WIDTH = 70
+
+
+class _TrackFooter(Footer):
+    def __init__(self) -> None:
+        super().__init__()
+        self._prioritize_navigation = False
+
+    def compose(self) -> ComposeResult:
+        children = list(super().compose())
+        if self._prioritize_navigation:
+            priority = {"topics": 0, "docs": 1, "quit": 2}
+            children.sort(
+                key=lambda child: priority.get(getattr(child, "action", ""), 3)
+            )
+        yield from children
+
+    def on_resize(self, event: events.Resize) -> None:
+        show_command_palette = event.size.width >= _FULL_FOOTER_WIDTH
+        prioritize_navigation = not show_command_palette
+        if (
+            self.show_command_palette != show_command_palette
+            or self._prioritize_navigation != prioritize_navigation
+        ):
+            self.show_command_palette = show_command_palette
+            self._prioritize_navigation = prioritize_navigation
+            self.call_after_refresh(self.recompose)
 
 
 def celebration_message(total: int) -> str:
@@ -61,7 +89,7 @@ class TrackScreen(Screen[None]):
             OutputPanel(id="output"),
             id="main",
         )
-        yield Footer()
+        yield _TrackFooter()
 
     def on_mount(self) -> None:
         self.app.sub_title = f"topic: {self.topic}"

@@ -1,6 +1,6 @@
 <!-- Readme.md -->
 <p align="center">
-  <img src="docs/assets/branding/pythonlings-banner.gif" alt="Pythonlings: a broken Python exercise is filled in, its I AM NOT DONE marker is removed, and its checks pass." width="100%">
+  <img src="https://raw.githubusercontent.com/abhiksark/pythonlings/v0.4.4/docs/assets/branding/pythonlings-banner.gif" alt="Pythonlings: a broken Python exercise is filled in, its I AM NOT DONE marker is removed, and its checks pass." width="100%">
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@ rerun as you type and advance you to the next one. That's the whole loop.
 
 Status: alpha. Published on PyPI as `pythonlings`.
 
-![Coding screen](docs/assets/screenshots/coding-screen.png)
+![Coding screen](https://raw.githubusercontent.com/abhiksark/pythonlings/v0.4.4/docs/assets/screenshots/coding-screen.png)
 
 ## Highlights
 
@@ -132,17 +132,17 @@ marker, and let the live check advance you to the next exercise.
 
 ## Demo
 
-![Pythonlings terminal demo](docs/assets/demos/pythonlings-demo.gif)
+![Pythonlings terminal demo](https://raw.githubusercontent.com/abhiksark/pythonlings/v0.4.4/docs/assets/demos/pythonlings-demo.gif)
 
-The demo is generated from [docs/demo.tape](docs/demo.tape). See
-[docs/DEMO_GIF.md](docs/DEMO_GIF.md) to regenerate it with
+The demo is generated from [docs/demo.tape](https://github.com/abhiksark/pythonlings/blob/main/docs/demo.tape). See
+[docs/DEMO_GIF.md](https://github.com/abhiksark/pythonlings/blob/main/docs/DEMO_GIF.md) to regenerate it with
 [VHS](https://github.com/charmbracelet/vhs). It covers the first-run flow,
 progress listing, hints, the coding screen, local docs, topic picker, and quit
 path.
 
 ## Interface
 
-![Topic picker](docs/assets/screenshots/topic-picker.png)
+![Topic picker](https://raw.githubusercontent.com/abhiksark/pythonlings/v0.4.4/docs/assets/screenshots/topic-picker.png)
 
 | Key | Action |
 |---|---|
@@ -155,7 +155,7 @@ path.
 | `Esc` | Close docs, or quit from main screens |
 | `Ctrl+Q` | Quit |
 
-![Local docs reference](docs/assets/screenshots/docs-reference.png)
+![Local docs reference](https://raw.githubusercontent.com/abhiksark/pythonlings/v0.4.4/docs/assets/screenshots/docs-reference.png)
 
 ## Project Layout
 
@@ -198,7 +198,7 @@ beginners. Current work is tracked in the
 [open issue tracker](https://github.com/abhiksark/pythonlings/issues?q=is%3Aissue+is%3Aopen).
 Start with a
 [`good first issue`](https://github.com/abhiksark/pythonlings/issues?q=is%3Aopen+label%3A%22good+first+issue%22),
-comment to claim it, and see [CONTRIBUTING.md](CONTRIBUTING.md).
+comment to claim it, and see [CONTRIBUTING.md](https://github.com/abhiksark/pythonlings/blob/main/CONTRIBUTING.md).
 
 Have an idea for a new exercise? Open an
 [Exercise Proposal](https://github.com/abhiksark/pythonlings/discussions/new?category=exercise-proposals)
@@ -225,15 +225,15 @@ feature/<name> -> dev -> main -> vMAJOR.MINOR.PATCH
 
 Feature branches are merged into `dev`. A verified `dev` branch is then merged
 into `main` and tagged with an annotated release tag such as `v0.1.0`.
-See [RELEASE.md](RELEASE.md) for the release checklist.
+See [RELEASE.md](https://github.com/abhiksark/pythonlings/blob/main/RELEASE.md) for the release checklist.
 
 ## Attribution
 
 Pythonlings is inspired by [rustlings](https://github.com/rust-lang/rustlings).
 Bundled reference snippets are generated from the official Python documentation.
-See [pythonlings/docs/NOTICE.md](pythonlings/docs/NOTICE.md) for Python documentation
+See [pythonlings/docs/NOTICE.md](https://github.com/abhiksark/pythonlings/blob/main/pythonlings/docs/NOTICE.md) for Python documentation
 licensing details.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](https://github.com/abhiksark/pythonlings/blob/main/LICENSE).

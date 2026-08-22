@@ -4,7 +4,7 @@ import webbrowser
 from pathlib import Path
 
 import pytest
-from textual.widgets import Markdown, Static, TextArea
+from textual.widgets import Footer, Markdown, Static, TextArea
 from textual.worker import WorkerCancelled
 
 from pythonlings.app import PythonlingsApp
@@ -159,6 +159,97 @@ async def test_f4_returns_to_picker(tmp_path: Path) -> None:
         await pilot.press("f4")
         await pilot.pause()
         assert isinstance(app.screen, TopicPickerScreen)
+
+
+@pytest.mark.asyncio
+async def test_narrow_layout_keeps_navigation_discoverable_and_usable(
+    tmp_path: Path,
+) -> None:
+    app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
+    async with app.run_test(size=(40, 15)) as pilot:
+        await _settle(pilot)
+        assert isinstance(app.screen, TrackScreen)
+
+        footer = app.screen.query_one(Footer)
+        keys = {key.key: key for key in footer.query("FooterKey")}
+        assert "ctrl+p" not in keys
+        for key_name in ("f4", "f5", "escape"):
+            key = keys[key_name]
+            assert key.region.x >= footer.region.x
+            assert key.region.right <= footer.region.right
+
+        await pilot.press("f5")
+        await pilot.pause()
+        assert isinstance(app.screen, DocsScreen)
+        docs_footer = str(app.screen.query_one("#docs-footer", Static).content)
+        assert docs_footer.startswith("Esc Close")
+
+        await pilot.press("escape")
+        await pilot.pause()
+        assert isinstance(app.screen, TrackScreen)
+
+        await pilot.press("f4")
+        await pilot.pause()
+        assert isinstance(app.screen, TopicPickerScreen)
+        picker_footer = app.screen.query_one(Footer)
+        picker_keys = {
+            key.key: key for key in picker_footer.query("FooterKey")
+        }
+        escape_key = picker_keys["escape"]
+        assert escape_key.region.x >= picker_footer.region.x
+        assert escape_key.region.right <= picker_footer.region.right
+
+        await pilot.press("escape")
+        await pilot.pause()
+        assert app.return_code == 0
+
+
+@pytest.mark.asyncio
+async def test_normal_width_footer_keeps_all_track_labels(tmp_path: Path) -> None:
+    app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
+    async with app.run_test(size=(80, 24)) as pilot:
+        await _settle(pilot)
+        footer = app.screen.query_one(Footer)
+        footer_keys = list(footer.query("FooterKey"))
+        keys = {key.key: key for key in footer_keys}
+        assert [
+            key.key
+            for key in footer_keys
+            if key.key in {"f1", "f2", "f3", "f4", "f5", "escape"}
+        ] == ["f1", "f2", "f3", "f4", "f5", "escape"]
+        assert keys["ctrl+p"].description == "palette"
+        assert {
+            key_name: keys[key_name].description
+            for key_name in ("f1", "f2", "f3", "f4", "f5", "escape")
+        } == {
+            "f1": "Hint",
+            "f2": "Reset",
+            "f3": "List",
+            "f4": "Topics",
+            "f5": "Docs",
+            "escape": "Quit",
+        }
+        assert all(
+            key.region.right <= footer.region.right for key in keys.values()
+        )
+
+
+@pytest.mark.asyncio
+async def test_docs_footer_uses_its_laid_out_width_at_41_columns(
+    tmp_path: Path,
+) -> None:
+    app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
+    async with app.run_test(size=(41, 15)) as pilot:
+        await _settle(pilot)
+        await pilot.press("f5")
+        await pilot.pause()
+        assert isinstance(app.screen, DocsScreen)
+
+        docs_footer = app.screen.query_one("#docs-footer", Static)
+        footer_text = str(docs_footer.content)
+        assert docs_footer.size.width == 23
+        assert footer_text == "Esc Close | O Docs"
+        assert len(footer_text) <= docs_footer.size.width
 
 
 @pytest.mark.asyncio

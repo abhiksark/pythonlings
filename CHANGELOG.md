@@ -4,6 +4,38 @@
 All notable changes to this project are documented here. Pythonlings follows
 Semantic Versioning.
 
+## [0.4.4] - 2026-08-21
+
+### Fixed
+
+- Status output no longer crashes on a console that cannot encode its symbols.
+  `verify`, `list`, `run` and `solution` raised `UnicodeEncodeError` under a
+  strict ASCII locale or a Windows code page; they now fall back to ASCII
+  stand-ins (`+` pass, `x` fail, `>` current, `-` locked) and keep the Unicode
+  glyphs where the console supports them. Captured check output is degraded the
+  same way rather than raising, since every check prints its own status line.
+- `doctor` no longer raises on a workspace it cannot read. Windows reports an
+  unresolvable path as `ERROR_CANT_RESOLVE_FILENAME` with no matching errno, so
+  it escaped the symlink-loop and missing-path branches and crashed the command
+  whose purpose is describing a broken workspace.
+- Navigation bindings stay reachable in narrow terminals. Below 70 columns the
+  footer hides the command-palette key and puts Topics, Docs and Quit first, so
+  they are no longer clipped off-screen at 40 columns.
+- Readme images now use absolute URLs, so they render on the PyPI project page
+  instead of appearing as broken links.
+
+### Changed
+
+- Continuous integration runs on Windows and macOS as well as Linux. Nothing in
+  the project had previously executed on Windows, which is why the encoding and
+  `doctor` failures above went unnoticed.
+- Failing checks in the `variables` and `async` topics now explain what was
+  expected instead of raising a bare `AssertionError`. Together with the
+  messages added in 0.4.3, `checks/async/` no longer has a single unexplained
+  assertion.
+- Curriculum conventions are documented in `CONTRIBUTING.md`, and new exercises
+  can be proposed through a discussion form rather than the issue tracker.
+
 ## [0.4.3] - 2026-08-20
 
 ### Added
