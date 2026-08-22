@@ -31,3 +31,7 @@ class EditorPane(Vertical):
     @property
     def text(self) -> str:
         return self.query_one("#code", TextArea).text
+
+    def set_text(self, text: str) -> None:
+        """Replace the editor contents without touching the cursor position."""
+        self.query_one("#code", TextArea).text = text

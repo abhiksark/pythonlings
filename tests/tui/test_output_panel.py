@@ -114,7 +114,28 @@ async def test_marker_pass_prompts_marker_removal(tmp_path: Path) -> None:
             ex, _result(0, stdout="ok"), failures=0, completed=0, total=2
         )
         await pilot.pause()
-        assert "remove marker" in panel.renderable_text().lower()
+        assert "remove the # i am not done" in panel.renderable_text().lower()
+
+
+@pytest.mark.asyncio
+async def test_marker_pass_with_auto_advance_shows_countdown(tmp_path: Path) -> None:
+    app = _Harness()
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        panel = app.query_one(OutputPanel)
+        ex = _exercise(tmp_path, "# I AM NOT DONE\nvalue = 1\n")
+        panel.render_result(
+            ex,
+            _result(0, stdout="ok"),
+            failures=0,
+            completed=0,
+            total=2,
+            auto_advance_seconds=4.0,
+        )
+        await pilot.pause()
+        rendered = panel.renderable_text().lower()
+        assert "checks pass" in rendered
+        assert "advancing to the next exercise in 4s" in rendered
 
 
 @pytest.mark.asyncio

@@ -356,6 +356,106 @@ async def test_instant_advance_updates_resume_to_next_exercise(
 
 
 @pytest.mark.asyncio
+async def test_marker_pass_schedules_auto_advance(tmp_path: Path) -> None:
+    work = _work_copy(tmp_path)
+    app = PythonlingsApp(root=work, start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        assert isinstance(track, TrackScreen)
+        track.query_one("#code", TextArea).text = "# I AM NOT DONE\nx = 1\n"
+        track._flush_and_run()
+        await _settle(pilot)
+        assert "a1" not in app.state.completed
+        assert track.current == "a1"
+        assert track._advance_timer is not None
+        assert (
+            "advancing to the next exercise in 4s"
+            in track.query_one(OutputPanel).renderable_text().lower()
+        )
+
+
+@pytest.mark.asyncio
+async def test_auto_advance_countdown_ticks_down_each_second(
+    tmp_path: Path,
+) -> None:
+    work = _work_copy(tmp_path)
+    app = PythonlingsApp(root=work, start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        assert isinstance(track, TrackScreen)
+        track.query_one("#code", TextArea).text = "# I AM NOT DONE\nx = 1\n"
+        track._flush_and_run()
+        await _settle(pilot)
+        assert track._advance_remaining == 4
+
+        track._tick_advance()
+        await pilot.pause()
+        assert track._advance_remaining == 3
+        assert (
+            "advancing to the next exercise in 3s"
+            in track.query_one(OutputPanel).renderable_text().lower()
+        )
+
+        track._tick_advance()
+        track._tick_advance()
+        await pilot.pause()
+        assert track._advance_remaining == 1
+        assert "a1" not in app.state.completed
+
+        track._tick_advance()  # remaining hits 0: fires the auto-advance
+        await _settle(pilot)
+        assert "a1" in app.state.completed
+        assert track.current == "a2"
+
+
+@pytest.mark.asyncio
+async def test_auto_advance_fires_strips_marker_and_advances(
+    tmp_path: Path,
+) -> None:
+    work = _work_copy(tmp_path)
+    app = PythonlingsApp(root=work, start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        assert isinstance(track, TrackScreen)
+        checked_text = "# I AM NOT DONE\nx = 1\n"
+        track.query_one("#code", TextArea).text = checked_text
+        track._flush_and_run()
+        await _settle(pilot)
+        # Simulate the auto-advance timer firing rather than waiting on it.
+        track._auto_advance(track._exercise("a1"), checked_text)
+        await _settle(pilot)
+        assert "a1" in app.state.completed
+        assert track.current == "a2"
+        assert "# I AM NOT DONE" not in (work / "exercises" / "alpha" / "a1.py").read_text(
+            encoding="utf-8"
+        )
+
+
+@pytest.mark.asyncio
+async def test_editing_during_countdown_cancels_auto_advance(
+    tmp_path: Path,
+) -> None:
+    work = _work_copy(tmp_path)
+    app = PythonlingsApp(root=work, start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        assert isinstance(track, TrackScreen)
+        track.query_one("#code", TextArea).text = "# I AM NOT DONE\nx = 1\n"
+        track._flush_and_run()
+        await _settle(pilot)
+        assert track._advance_timer is not None
+        track.query_one("#code", TextArea).text = "# I AM NOT DONE\nx = 2\n"
+        await _settle(pilot)
+        assert track._advance_timer is None
+        assert "a1" not in app.state.completed
+        assert track.current == "a1"
+
+
+@pytest.mark.asyncio
 async def test_failed_run_shows_progressive_nudge(tmp_path: Path) -> None:
     work = _work_copy(tmp_path)
     app = PythonlingsApp(root=work, start_topic="alpha")
