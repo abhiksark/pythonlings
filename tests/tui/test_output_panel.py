@@ -105,6 +105,7 @@ async def test_result_shows_docs_link(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_marker_pass_prompts_marker_removal(tmp_path: Path) -> None:
+    """Without a countdown, the panel falls back to the manual instruction."""
     app = _Harness()
     async with app.run_test() as pilot:
         await pilot.pause()
@@ -119,6 +120,7 @@ async def test_marker_pass_prompts_marker_removal(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_marker_pass_with_auto_advance_shows_countdown(tmp_path: Path) -> None:
+    """Passing auto_advance_seconds swaps in the countdown message."""
     app = _Harness()
     async with app.run_test() as pilot:
         await pilot.pause()

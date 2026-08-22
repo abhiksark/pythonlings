@@ -11,7 +11,7 @@ from pythonlings.app import PythonlingsApp
 from pythonlings.core.state import State, save as save_state
 from pythonlings.screens.docs import DocsScreen
 from pythonlings.screens.topic_picker import TopicPickerScreen
-from pythonlings.screens.track import TrackScreen
+from pythonlings.screens.track import _AUTO_ADVANCE_SECONDS, TrackScreen
 from pythonlings.widgets.output_panel import OutputPanel
 
 MULTI = Path(__file__).parent.parent / "fixtures" / "multi_topic"
@@ -357,6 +357,7 @@ async def test_instant_advance_updates_resume_to_next_exercise(
 
 @pytest.mark.asyncio
 async def test_marker_pass_schedules_auto_advance(tmp_path: Path) -> None:
+    """Checks passing with the marker still present starts the countdown."""
     work = _work_copy(tmp_path)
     app = PythonlingsApp(root=work, start_topic="alpha")
     async with app.run_test() as pilot:
@@ -370,7 +371,7 @@ async def test_marker_pass_schedules_auto_advance(tmp_path: Path) -> None:
         assert track.current == "a1"
         assert track._advance_timer is not None
         assert (
-            "advancing to the next exercise in 4s"
+            f"advancing to the next exercise in {_AUTO_ADVANCE_SECONDS}s"
             in track.query_one(OutputPanel).renderable_text().lower()
         )
 
@@ -379,6 +380,7 @@ async def test_marker_pass_schedules_auto_advance(tmp_path: Path) -> None:
 async def test_auto_advance_countdown_ticks_down_each_second(
     tmp_path: Path,
 ) -> None:
+    """Each tick decrements the countdown and updates the panel text."""
     work = _work_copy(tmp_path)
     app = PythonlingsApp(root=work, start_topic="alpha")
     async with app.run_test() as pilot:
@@ -388,18 +390,18 @@ async def test_auto_advance_countdown_ticks_down_each_second(
         track.query_one("#code", TextArea).text = "# I AM NOT DONE\nx = 1\n"
         track._flush_and_run()
         await _settle(pilot)
-        assert track._advance_remaining == 4
+        assert track._advance_remaining == _AUTO_ADVANCE_SECONDS
 
         track._tick_advance()
         await pilot.pause()
-        assert track._advance_remaining == 3
+        assert track._advance_remaining == _AUTO_ADVANCE_SECONDS - 1
         assert (
-            "advancing to the next exercise in 3s"
+            f"advancing to the next exercise in {_AUTO_ADVANCE_SECONDS - 1}s"
             in track.query_one(OutputPanel).renderable_text().lower()
         )
 
-        track._tick_advance()
-        track._tick_advance()
+        for _ in range(_AUTO_ADVANCE_SECONDS - 2):
+            track._tick_advance()
         await pilot.pause()
         assert track._advance_remaining == 1
         assert "a1" not in app.state.completed
@@ -414,6 +416,7 @@ async def test_auto_advance_countdown_ticks_down_each_second(
 async def test_auto_advance_fires_strips_marker_and_advances(
     tmp_path: Path,
 ) -> None:
+    """When the countdown fires, the marker is stripped on disk and advances."""
     work = _work_copy(tmp_path)
     app = PythonlingsApp(root=work, start_topic="alpha")
     async with app.run_test() as pilot:
@@ -438,6 +441,7 @@ async def test_auto_advance_fires_strips_marker_and_advances(
 async def test_editing_during_countdown_cancels_auto_advance(
     tmp_path: Path,
 ) -> None:
+    """Resuming an edit mid-countdown cancels the auto-advance timer."""
     work = _work_copy(tmp_path)
     app = PythonlingsApp(root=work, start_topic="alpha")
     async with app.run_test() as pilot:

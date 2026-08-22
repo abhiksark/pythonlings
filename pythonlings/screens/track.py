@@ -149,6 +149,7 @@ class TrackScreen(Screen[None]):
         raise KeyError(name)
 
     def _load_current(self) -> None:
+        """Load `self.current` into the editor, resetting per-exercise state."""
         if self.current is None:
             return
         if self._save_timer is not None:
@@ -169,6 +170,7 @@ class TrackScreen(Screen[None]):
     # --- auto-save / run loop -------------------------------------------
 
     def on_text_area_changed(self, event: TextArea.Changed) -> None:
+        """Restart the save/run debounce timer on each real editor edit."""
         if event.text_area is not self.query_one("#code", TextArea):
             return
         if self.query_one(EditorPane).text == self._loaded_text:
@@ -201,6 +203,7 @@ class TrackScreen(Screen[None]):
         self.app.call_from_thread(self._apply_result, exercise, result)
 
     def _apply_result(self, exercise: Exercise, result: RunResult) -> None:
+        """Render a check result and advance once it's fully passed."""
         if not self.is_attached:
             return  # the track screen was popped while a run was in flight
         if exercise.name != self.current:
@@ -248,6 +251,7 @@ class TrackScreen(Screen[None]):
         self._run_current()
 
     def _schedule_auto_advance(self, exercise: Exercise, checked_text: str) -> None:
+        """Start the countdown that strips the marker once checks pass."""
         self._stop_advance_timer()
         self._advance_exercise = exercise
         self._advance_text = checked_text
@@ -255,6 +259,7 @@ class TrackScreen(Screen[None]):
         self._advance_timer = self.set_interval(1.0, self._tick_advance)
 
     def _stop_advance_timer(self) -> None:
+        """Cancel any pending auto-advance countdown, e.g. on a resumed edit."""
         if self._advance_timer is not None:
             self._advance_timer.stop()
             self._advance_timer = None
@@ -262,6 +267,7 @@ class TrackScreen(Screen[None]):
         self._advance_text = ""
 
     def _tick_advance(self) -> None:
+        """Decrement the countdown each second, firing the advance at zero."""
         self._advance_remaining -= 1
         exercise, checked_text = self._advance_exercise, self._advance_text
         if self._advance_remaining <= 0:
@@ -273,6 +279,7 @@ class TrackScreen(Screen[None]):
             self.query_one(OutputPanel).update_countdown(self._advance_remaining)
 
     def _auto_advance(self, exercise: Exercise, checked_text: str) -> None:
+        """Strip the marker and rerun checks, unless the learner kept editing."""
         if not self.is_attached or exercise.name != self.current:
             return
         pane = self.query_one(EditorPane)
@@ -329,6 +336,7 @@ class TrackScreen(Screen[None]):
         self.app.exit(0)
 
     def _flush_pending(self) -> None:
+        """Write out an unsaved edit before leaving the screen."""
         self._stop_advance_timer()
         if self._save_timer is not None:
             self._save_timer.stop()

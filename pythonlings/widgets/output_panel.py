@@ -62,6 +62,7 @@ class OutputPanel(Vertical):
         total: int = 0,
         auto_advance_seconds: float | None = None,
     ) -> None:
+        """Render a finished check run: failure, pending marker, or complete."""
         self._render_header(exercise, completed, total)
         self.query_one("#goal", Static).update(
             f"[bold]Goal[/bold]\n{self._goal_from(exercise)}"
@@ -122,6 +123,7 @@ class OutputPanel(Vertical):
 
     @staticmethod
     def _advance_message(seconds: float) -> str:
+        """Format the shared countdown text used by both render paths."""
         return f"Advancing to the next exercise in {seconds:.0f}s…"
 
     def show_final(self, message: str) -> None:
