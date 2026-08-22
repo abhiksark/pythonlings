@@ -60,7 +60,9 @@ class OutputPanel(Vertical):
         failures: int = 0,
         completed: int = 0,
         total: int = 0,
+        auto_advance_seconds: float | None = None,
     ) -> None:
+        """Render a finished check run: failure, pending marker, or complete."""
         self._render_header(exercise, completed, total)
         self.query_one("#goal", Static).update(
             f"[bold]Goal[/bold]\n{self._goal_from(exercise)}"
@@ -98,11 +100,14 @@ class OutputPanel(Vertical):
         if exercise.is_pending():
             self.add_class("pending")
             self.query_one("#status", Static).update(
-                "[bold yellow]Checks pass, remove marker[/bold yellow]"
+                "[bold green]✓ Checks pass[/bold green]"
             )
-            self.query_one("#next-step", Static).update(
-                "Remove the # I AM NOT DONE line to advance."
+            next_step = (
+                self._advance_message(auto_advance_seconds)
+                if auto_advance_seconds
+                else "Remove the # I AM NOT DONE line to advance."
             )
+            self.query_one("#next-step", Static).update(next_step)
             return
         self.add_class("passed")
         self.query_one("#status", Static).update(
@@ -111,6 +116,15 @@ class OutputPanel(Vertical):
         self.query_one("#next-step", Static).update(
             "Loading the next exercise."
         )
+
+    def update_countdown(self, seconds: int) -> None:
+        """Tick the auto-advance countdown shown in the pending state."""
+        self.query_one("#next-step", Static).update(self._advance_message(seconds))
+
+    @staticmethod
+    def _advance_message(seconds: float) -> str:
+        """Format the shared countdown text used by both render paths."""
+        return f"Advancing to the next exercise in {seconds:.0f}s…"
 
     def show_final(self, message: str) -> None:
         """Render the whole-curriculum-complete screen."""

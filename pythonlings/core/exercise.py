@@ -22,6 +22,12 @@ class Exercise:
     def is_pending(self) -> bool:
         return self.DONE_MARKER in self.path.read_text(encoding="utf-8")
 
+    def strip_marker(self, text: str) -> str:
+        """Remove the '# I AM NOT DONE' marker line, if present as its own line."""
+        lines = text.splitlines(keepends=True)
+        kept = [line for line in lines if line.strip() != self.DONE_MARKER]
+        return "".join(kept)
+
 
 @dataclass
 class RunResult:
