@@ -26,8 +26,14 @@ class EditorPane(Vertical):
         area.move_cursor((0, 0))
 
     def focus_editor(self) -> None:
+        """Move input focus to the code editor."""
         self.query_one("#code", TextArea).focus()
 
     @property
     def text(self) -> str:
+        """The editor's current buffer contents."""
         return self.query_one("#code", TextArea).text
+
+    def set_text(self, text: str) -> None:
+        """Replace the editor contents without touching the cursor position."""
+        self.query_one("#code", TextArea).text = text

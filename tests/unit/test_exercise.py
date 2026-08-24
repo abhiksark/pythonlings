@@ -33,6 +33,27 @@ def test_is_pending_marker_inside_string_still_counts(tmp_path: Path) -> None:
     assert _ex(file).is_pending() is True
 
 
+def test_strip_marker_removes_marker_line(tmp_path: Path) -> None:
+    """strip_marker deletes the marker line and keeps the rest intact."""
+    ex = _ex(tmp_path / "ex.py")
+    stripped = ex.strip_marker("# I AM NOT DONE\nx = 1\n")
+    assert stripped == "x = 1\n"
+
+
+def test_strip_marker_leaves_marker_inside_string_untouched(tmp_path: Path) -> None:
+    """A marker embedded in a string literal is not a real marker line."""
+    ex = _ex(tmp_path / "ex.py")
+    text = 's = "# I AM NOT DONE"\n'
+    assert ex.strip_marker(text) == text
+
+
+def test_strip_marker_noop_when_marker_absent(tmp_path: Path) -> None:
+    """Stripping text with no marker line returns it unchanged."""
+    ex = _ex(tmp_path / "ex.py")
+    text = "x = 1\n"
+    assert ex.strip_marker(text) == text
+
+
 def test_exercise_is_frozen() -> None:
     ex = Exercise(
         name="a",
