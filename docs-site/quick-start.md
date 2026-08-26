@@ -61,6 +61,8 @@ pythonlings update               # pull new exercises into an existing workspace
 ## Exercise Loop
 
 Each exercise contains a `# I AM NOT DONE` marker. Open the file in the TUI
-editor (or any editor), fix the broken code, then remove the marker. Pythonlings
-runs the hidden check automatically; when the check passes and the marker is gone,
-the exercise is marked complete and progress advances to the next one.
+editor and fix the broken code, then remove the marker. The built-in editor runs
+the hidden check automatically; if you use an external editor, save the file and
+run `pythonlings run <name>` to check it manually. When the check passes and the
+marker is gone in the TUI, the exercise is marked complete and progress advances
+to the next one.
