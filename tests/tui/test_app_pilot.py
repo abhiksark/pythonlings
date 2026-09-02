@@ -46,6 +46,26 @@ async def test_default_launch_opens_first_pending_exercise(tmp_path: Path) -> No
 
 
 @pytest.mark.asyncio
+async def test_invalid_utf8_exercise_stays_open_and_shows_error(
+    tmp_path: Path,
+) -> None:
+    work = _work_copy(tmp_path)
+    exercise_path = work / "exercises" / "alpha" / "a1.py"
+    exercise_path.write_bytes(b'x = "\xff"\n')
+
+    app = PythonlingsApp(root=work)
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        assert isinstance(app.screen, TrackScreen)
+        assert app.screen.current == "a1"
+        assert app.screen.query_one("#code", TextArea).text == ""
+        rendered = app.screen.query_one(OutputPanel).renderable_text()
+        assert "not valid UTF-8" in rendered
+        assert "a1" in rendered
+        assert str(exercise_path) in rendered
+
+
+@pytest.mark.asyncio
 async def test_picker_lists_topics_with_progress(tmp_path: Path) -> None:
     app = PythonlingsApp(root=_work_copy(tmp_path), force_picker=True)
     async with app.run_test() as pilot:

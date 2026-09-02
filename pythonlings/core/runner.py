@@ -34,7 +34,10 @@ def run(exercise: Exercise, timeout_s: float = DEFAULT_TIMEOUT_S) -> RunResult:
             passed=False,
             exit_code=-1,
             stdout="",
-            stderr=f"pythonlings: exercise is not valid UTF-8: {e}",
+            stderr=(
+                f"pythonlings: exercise {exercise.name!r} at {exercise_path} "
+                f"is not valid UTF-8: {e}"
+            ),
             duration_s=0.0,
             timed_out=False,
         )

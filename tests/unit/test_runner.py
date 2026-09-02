@@ -104,6 +104,8 @@ def test_invalid_utf8_exercise_returns_failure_not_raise(tmp_path: Path) -> None
     assert result.passed is False
     assert result.exit_code != 0
     assert "not valid UTF-8" in result.stderr
+    assert "invalid-utf8" in result.stderr
+    assert str(ex_path) in result.stderr
     assert result.timed_out is False
 
 
