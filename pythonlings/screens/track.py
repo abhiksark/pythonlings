@@ -100,8 +100,8 @@ class TrackScreen(Screen[None]):
                 f"Topic '{self.topic}' complete."
             )
             return
-        self._load_current()
-        self._run_current()
+        if self._load_current():
+            self._run_current()
         self.query_one(EditorPane).focus_editor()
 
     # --- helpers ---------------------------------------------------------
@@ -143,18 +143,45 @@ class TrackScreen(Screen[None]):
                 return ex
         raise KeyError(name)
 
-    def _load_current(self) -> None:
+    def _load_current(self) -> bool:
         if self.current is None:
-            return
+            return False
         if self._save_timer is not None:
             self._save_timer.stop()
             self._save_timer = None
         self.query_one(OutputPanel).reset_hint()
         pane = self.query_one(EditorPane)
-        pane.load_exercise(self._exercise(self.current))
+        exercise = self._exercise(self.current)
+        try:
+            pane.load_exercise(exercise)
+        except UnicodeDecodeError as error:
+            pane.query_one("#code", TextArea).text = ""
+            self._loaded_text = ""
+            self._failure_counts[self.current] = 1
+            self._record_resume(self.current)
+            completed, total = self._progress_counts()
+            self.query_one(OutputPanel).render_result(
+                exercise,
+                RunResult(
+                    passed=False,
+                    exit_code=-1,
+                    stdout="",
+                    stderr=(
+                        f"pythonlings: exercise {exercise.name!r} at "
+                        f"{exercise.path} is not valid UTF-8: {error}"
+                    ),
+                    duration_s=0.0,
+                    timed_out=False,
+                ),
+                failures=1,
+                completed=completed,
+                total=total,
+            )
+            return False
         self._loaded_text = pane.text
         self._failure_counts[self.current] = 0
         self._record_resume(self.current)
+        return True
 
     def _record_resume(self, exercise: str | None) -> None:
         self.app.state.record_resume(self.topic, exercise)
@@ -230,8 +257,8 @@ class TrackScreen(Screen[None]):
                     f"Topic '{self.topic}' complete — press F4 for topics."
                 )
             return
-        self._load_current()
-        self._run_current()
+        if self._load_current():
+            self._run_current()
 
     # --- actions ---------------------------------------------------------
 
@@ -249,8 +276,8 @@ class TrackScreen(Screen[None]):
             self._save_timer.stop()
             self._save_timer = None
         restore(self.app.root, self._exercise(self.current))
-        self._load_current()
-        self._run_current()
+        if self._load_current():
+            self._run_current()
 
     def action_toggle_list(self) -> None:
         tree = self.query_one(ExerciseTree)

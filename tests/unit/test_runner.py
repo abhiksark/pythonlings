@@ -82,6 +82,33 @@ def test_utf8_output(tmp_path: Path) -> None:
     assert "héllo 🐍" in result.stdout
 
 
+def test_invalid_utf8_exercise_returns_failure_not_raise(tmp_path: Path) -> None:
+    # Regression for #72: an invalidly encoded exercise must not escape
+    # run()'s no-raise contract as UnicodeDecodeError.
+    ex_path = tmp_path / "exercise.py"
+    check_path = tmp_path / "check.py"
+    ex_path.write_bytes(b'x = "\xff"\n')
+    check_path.write_text("assert True\n", encoding="utf-8")
+
+    result = run(
+        Exercise(
+            name="invalid-utf8",
+            path=ex_path,
+            check_path=check_path,
+            topic="t",
+            hint="",
+            root=tmp_path,
+        )
+    )
+
+    assert result.passed is False
+    assert result.exit_code != 0
+    assert "not valid UTF-8" in result.stderr
+    assert "invalid-utf8" in result.stderr
+    assert str(ex_path) in result.stderr
+    assert result.timed_out is False
+
+
 def test_runner_uses_workspace_for_relative_files(tmp_path: Path) -> None:
     data_path = tmp_path / "data.txt"
     data_path.write_text("pythonlings\n", encoding="utf-8")
