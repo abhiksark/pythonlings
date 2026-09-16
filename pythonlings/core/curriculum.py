@@ -97,9 +97,13 @@ def init_workspace(path: Path, *, force: bool = False) -> Path:
             f"{path} isn't empty and isn't a pythonlings workspace. "
             "Pick another location with --path <dir>, or --force to set up here anyway."
         )
-    path.mkdir(parents=True, exist_ok=True)
+    src_root = source_root().resolve()
+    if path == src_root:
+        raise WorkspaceError(
+            f"cannot initialize the curriculum source at {path}"
+        )
 
-    src_root = source_root()
+    path.mkdir(parents=True, exist_ok=True)
     _copy_path(src_root / "info.toml", path / "info.toml", overwrite=True)
     for dirname in CURRICULUM_DIRS:
         _copy_path(src_root / dirname, path / dirname, overwrite=True)
