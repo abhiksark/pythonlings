@@ -116,3 +116,27 @@ def test_update_workspace_preserves_existing_gitignore_entries(tmp_path: Path) -
     curriculum.update_workspace(target)
 
     assert gitignore.read_text(encoding="utf-8") == expected
+
+def test_init_workspace_rejects_curriculum_source(tmp_path: Path, monkeypatch) -> None:
+    target = tmp_path / "source"
+    target.mkdir()
+    (target / "info.toml").write_text("keep = true
+", encoding="utf-8")
+    marker = target / "keep.txt"
+    marker.write_text("unchanged
+", encoding="utf-8")
+    monkeypatch.setattr(curriculum, "source_root", lambda: target)
+
+    try:
+        curriculum.init_workspace(target, force=True)
+    except curriculum.WorkspaceError as exc:
+        assert "cannot initialize the curriculum source" in str(exc)
+    else:
+        raise AssertionError("expected WorkspaceError")
+
+    assert marker.read_text(encoding="utf-8") == "unchanged
+"
+    assert not (target / "exercises").exists()
+    assert (target / "info.toml").read_text(encoding="utf-8") == "keep = true
+"
+
