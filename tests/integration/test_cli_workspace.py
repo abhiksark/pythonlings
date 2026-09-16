@@ -279,3 +279,21 @@ def test_bare_update_rejects_curriculum_source(
     assert code == 1
     assert "curriculum source" in capsys.readouterr().err
     assert local_check.read_text(encoding="utf-8") == "keep\n"
+
+
+def test_init_force_rejects_curriculum_source(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    target = tmp_path / "source-workspace"
+    assert main(["init", "--path", str(target)]) == 0
+    local_check = target / "checks" / "local-only.py"
+    local_check.write_text("keep\n", encoding="utf-8")
+
+    monkeypatch.setattr(curriculum, "source_root", lambda: target)
+
+    code = main(["init", "--path", str(target), "--force"])
+
+    assert code == 1
+    err = capsys.readouterr().err
+    assert "curriculum source" in err
+    assert local_check.read_text(encoding="utf-8") == "keep\n"

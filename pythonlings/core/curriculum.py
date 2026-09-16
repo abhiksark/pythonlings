@@ -92,6 +92,11 @@ def _sync_originals(root: Path, src_root: Path) -> None:
 
 def init_workspace(path: Path, *, force: bool = False) -> Path:
     path = path.expanduser().resolve()
+    src_root = source_root().resolve()
+    if path == src_root:
+        raise WorkspaceError(
+            f"cannot initialize the curriculum source in place at {path}"
+        )
     if path.exists() and any(path.iterdir()) and not force:
         raise WorkspaceError(
             f"{path} isn't empty and isn't a pythonlings workspace. "
