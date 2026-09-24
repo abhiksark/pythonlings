@@ -1,0 +1,440 @@
+# pythonlings/cli.py
+from __future__ import annotations
+
+import argparse
+import sys
+from importlib.metadata import PackageNotFoundError, version as _package_version
+from pathlib import Path
+
+from pythonlings.core.workspace import default_workspace_root
+
+try:
+    __version__ = _package_version("pythonlings")
+except PackageNotFoundError:  # running from a source checkout without an install
+    __version__ = "0.0.0+unknown"
+
+
+# Status glyphs, with ASCII stand-ins for consoles whose encoding cannot
+# represent them (a Windows code page, or LC_ALL=C). The fallbacks stay one
+# column wide so aligned output keeps its shape.
+_ASCII_FALLBACK = {"\u2713": "+", "\u2717": "x", "\u25cf": ">", "\U0001f512": "-"}
+
+
+def _encodable(stream: object, text: str) -> bool:
+    encoding = getattr(stream, "encoding", None)
+    if not encoding:
+        return True
+    try:
+        text.encode(encoding)
+    except (UnicodeEncodeError, LookupError):
+        return False
+    return True
+
+
+def _symbol(stream: object, glyph: str) -> str:
+    """Return `glyph`, or an ASCII stand-in the stream can actually encode."""
+    if _encodable(stream, glyph):
+        return glyph
+    return _ASCII_FALLBACK.get(glyph, "?")
+
+
+def _write(stream, text: str) -> None:
+    """Write captured output, degrading characters the encoding cannot represent.
+
+    Check files print their own status line (`print("variables1 \u2713")`), so
+    curriculum output reaches us containing glyphs a strict-ASCII console
+    cannot encode. Losing a glyph is better than a traceback.
+    """
+    try:
+        stream.write(text)
+    except UnicodeEncodeError:
+        encoding = getattr(stream, "encoding", None) or "ascii"
+        stream.write(text.encode(encoding, "replace").decode(encoding, "replace"))
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="pythonlings")
+    parser.add_argument("--version", action="version", version=f"pythonlings {__version__}")
+    parser.add_argument(
+        "--debug", action="store_true", help="Write debug output to .pythonlings_debug.log."
+    )
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=None,
+        help="Workspace root containing info.toml (default: auto-resolve).",
+    )
+    sub = parser.add_subparsers(dest="command")
+
+    p_init = sub.add_parser("init", help="Create a pythonlings workspace.")
+    p_init.add_argument("--path", type=Path, default=default_workspace_root())
+    p_init.add_argument(
+        "--force", action="store_true", help="Overwrite managed workspace files."
+    )
+
+    p_update = sub.add_parser("update", help="Update an existing pythonlings workspace.")
+    p_update.add_argument("--path", type=Path, default=None)
+
+    sub.add_parser("watch", help="Launch the TUI in watch mode (default).")
+    sub.add_parser("topics", help="Launch the TUI on the topic picker.")
+
+    p_run = sub.add_parser("run", help="Run a single exercise.")
+    p_run.add_argument("name")
+
+    p_dry_run = sub.add_parser("dry-run", help="Run one exercise non-interactively.")
+    p_dry_run.add_argument("name")
+
+    p_solution = sub.add_parser(
+        "solution", aliases=["sol"], help="Run a reference solution."
+    )
+    p_solution.add_argument("name")
+
+    p_hint = sub.add_parser("hint", help="Print the hint for an exercise.")
+    p_hint.add_argument("name")
+
+    p_list = sub.add_parser("list", help="List topics, or one topic's exercises.")
+    p_list.add_argument("topic", nargs="?", help="Show exercises of this topic.")
+
+    p_start = sub.add_parser("start", help="Launch the TUI on a topic's track.")
+    p_start.add_argument("topic")
+
+    p_reset = sub.add_parser("reset", help="Restore an exercise from its snapshot.")
+    p_reset.add_argument("name")
+    p_reset.add_argument("--yes", action="store_true", help="Skip the confirmation prompt.")
+
+    p_verify = sub.add_parser(
+        "verify", help="Run every exercise, or just one topic's."
+    )
+    p_verify.add_argument("topic", nargs="?", help="Verify only this topic.")
+
+    sub.add_parser(
+        "doctor", help="Check the Pythonlings installation and workspace."
+    )
+
+    return parser
+
+
+def _display_path(path: Path) -> str:
+    """Render `path` with a leading `~/` when inside the home directory."""
+    try:
+        return "~/" + str(path.relative_to(Path.home()))
+    except ValueError:
+        return str(path)
+
+
+def _resolve_topic(manifest, topic: str):
+    """Return the topic name if valid, else write an error and return None."""
+    if topic in manifest.topics():
+        return topic
+    sys.stderr.write(
+        f"pythonlings: no topic named {topic!r}. "
+        f"Topics: {', '.join(manifest.topics())}\n"
+    )
+    return None
+
+
+def _cmd_init(path: Path, force: bool) -> int:
+    from pythonlings.core.curriculum import WorkspaceError, init_workspace
+    from pythonlings.core.workspace import is_workspace
+
+    path = path.expanduser().resolve()
+    if is_workspace(path) and not force:
+        print(f"Already set up at {path} — just run `pythonlings`")
+        return 0
+    try:
+        root = init_workspace(path, force=force)
+    except WorkspaceError as e:
+        sys.stderr.write(f"pythonlings: {e}\n")
+        return 1
+    print(f"Created your workspace at {_display_path(root)}")
+    return 0
+
+
+def _cmd_update(path: Path) -> int:
+    from pythonlings.core.curriculum import WorkspaceError, update_workspace
+
+    try:
+        root = update_workspace(path)
+    except WorkspaceError as e:
+        sys.stderr.write(f"pythonlings: {e}\n")
+        return 1
+    print(f"updated: {root}")
+    return 0
+
+
+def _cmd_verify(root: Path, topic: str | None) -> int:
+    from pythonlings.core.manifest import load as load_manifest
+    from pythonlings.core.runner import run_verify
+
+    manifest = load_manifest(root)
+    if topic is not None:
+        if _resolve_topic(manifest, topic) is None:
+            return 2
+        exercises = manifest.exercises_in(topic)
+    else:
+        exercises = manifest.exercises
+    for ex in exercises:
+        result = run_verify(ex)
+        status = _symbol(sys.stdout, "✓" if result.passed else "✗")
+        print(f"{status} {ex.name}")
+        if not result.passed:
+            _write(sys.stderr, result.stderr or result.stdout)
+            return 1
+    return 0
+
+
+def _cmd_list(root: Path, topic: str | None) -> int:
+    from pythonlings.core.manifest import load as load_manifest
+    from pythonlings.core.state import load as load_state, next_pending
+
+    manifest = load_manifest(root)
+    state = load_state(root)
+
+    if topic is None:
+        for name in manifest.topics():
+            exs = manifest.exercises_in(name)
+            done = sum(1 for ex in exs if ex.name in state.completed)
+            mark = _symbol(sys.stdout, "✓") if done == len(exs) else (
+                _symbol(sys.stdout, "●") if done else " "
+            )
+            print(f"  {mark}  {name}  {done}/{len(exs)}")
+        return 0
+
+    if _resolve_topic(manifest, topic) is None:
+        return 2
+    exs = manifest.exercises_in(topic)
+    current = next_pending(exs, state.completed)
+    for ex in exs:
+        if ex.name in state.completed:
+            marker = _symbol(sys.stdout, "✓")
+        elif ex.name == current:
+            marker = _symbol(sys.stdout, "●")
+        else:
+            marker = _symbol(sys.stdout, "🔒")
+        print(f"  {marker}  {ex.name}")
+    return 0
+
+
+def _cmd_hint(root: Path, name: str) -> int:
+    from pythonlings.core.manifest import load as load_manifest
+
+    manifest = load_manifest(root)
+    try:
+        ex = manifest.by_name(name)
+    except KeyError:
+        sys.stderr.write(f"pythonlings: no exercise named {name!r}\n")
+        return 1
+    print(ex.hint.strip() or "(no hint provided)")
+    if ex.docs:
+        print(f"Docs: {ex.docs}")
+    return 0
+
+
+def _cmd_run(root: Path, name: str) -> int:
+    from pythonlings.core.manifest import load as load_manifest
+    from pythonlings.core.runner import run as run_exercise
+
+    manifest = load_manifest(root)
+    try:
+        ex = manifest.by_name(name)
+    except KeyError:
+        sys.stderr.write(f"pythonlings: no exercise named {name!r}\n")
+        return 1
+
+    result = run_exercise(ex)
+    if result.stdout:
+        _write(sys.stdout, result.stdout)
+    if result.stderr:
+        _write(sys.stderr, result.stderr)
+    if result.timed_out:
+        sys.stderr.write(f"pythonlings: {name} timed out after {result.duration_s:.1f}s\n")
+        return 1
+    if result.exit_code != 0:
+        return 1
+    if ex.is_pending():
+        sys.stderr.write(
+            f"pythonlings: tests pass but the '# I AM NOT DONE' marker is still in {name}.\n"
+        )
+        return 1
+    return 0
+
+
+def _cmd_solution(root: Path, name: str) -> int:
+    from pythonlings.core.manifest import load as load_manifest
+    from pythonlings.core.runner import run_verify
+    from pythonlings.core.solutions import SolutionError, solution_exercise
+
+    manifest = load_manifest(root)
+    try:
+        ex = solution_exercise(root, manifest.by_name(name))
+    except KeyError:
+        sys.stderr.write(f"pythonlings: no exercise named {name!r}\n")
+        return 1
+    except SolutionError as e:
+        sys.stderr.write(f"pythonlings: {e}\n")
+        return 1
+
+    result = run_verify(ex)
+    if result.stdout:
+        _write(sys.stdout, result.stdout)
+    if result.stderr:
+        _write(sys.stderr, result.stderr)
+    return 0 if result.passed else 1
+
+
+def _cmd_reset(root: Path, name: str, yes: bool) -> int:
+    from pythonlings.core.manifest import load as load_manifest
+    from pythonlings.core.reset import ResetError, restore
+    from pythonlings.core.state import load as load_state, save as save_state
+
+    manifest = load_manifest(root)
+    try:
+        ex = manifest.by_name(name)
+    except KeyError:
+        sys.stderr.write(f"pythonlings: no exercise named {name!r}\n")
+        return 1
+
+    if not yes:
+        sys.stdout.write(f"Reset {name}? (y/N) ")
+        sys.stdout.flush()
+        if sys.stdin.readline().strip().lower() != "y":
+            return 0
+
+    try:
+        restore(root, ex)
+    except ResetError as e:
+        sys.stderr.write(f"pythonlings: {e}\n")
+        return 1
+
+    state = load_state(root)
+    state.completed.discard(name)
+    save_state(root, state)
+    print(f"reset: {name}")
+    return 0
+
+
+def _cmd_doctor(root: Path, resolution_error: Exception | None = None) -> int:
+    from pythonlings.core.doctor import CheckStatus, run_diagnostics
+
+    report = run_diagnostics(
+        root,
+        package_version=__version__,
+        resolution_error=resolution_error,
+    )
+    print("Pythonlings doctor")
+    print(f"Workspace: {report.root}")
+    print()
+    for check in report.checks:
+        print(f"[{check.status.value}] {check.name}: {check.message}")
+
+    warnings = sum(
+        check.status is CheckStatus.WARNING for check in report.checks
+    )
+    failures = sum(
+        check.status is CheckStatus.FAILURE for check in report.checks
+    )
+    print()
+    print(
+        f"Summary: {len(report.checks)} checks, "
+        f"{warnings} warning(s), {failures} failure(s)"
+    )
+    return 1 if report.has_failures else 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = _build_parser()
+    args = parser.parse_args(argv if argv is not None else sys.argv[1:])
+
+    from pythonlings.core.curriculum import migrate_legacy_state_dir
+    from pythonlings.core.workspace import resolve_workspace_root
+
+    try:
+        root: Path | None = None
+        update_root: Path | None = None
+        if args.command == "init":
+            migrate_legacy_state_dir(Path(args.path))
+        elif args.command == "update":
+            explicit_root = args.path if args.path is not None else args.root
+            update_root = resolve_workspace_root(
+                Path.cwd(), explicit_root, create_if_missing=False
+            ).root
+        else:
+            launches_tui = args.command in (None, "watch", "start", "topics")
+            try:
+                resolved = resolve_workspace_root(
+                    Path.cwd(), args.root, create_if_missing=launches_tui
+                )
+            except (OSError, RuntimeError) as exc:
+                if args.command == "doctor":
+                    unresolved = args.root if args.root is not None else Path(".")
+                    return _cmd_doctor(unresolved, resolution_error=exc)
+                raise
+            root = resolved.root
+            if args.command != "doctor":
+                migrate_legacy_state_dir(root)
+            if resolved.created:
+                print(
+                    f"Created your workspace at {_display_path(root)} "
+                    "(edit in-app, or open that folder in your editor)"
+                )
+
+        if (
+            getattr(args, "debug", False)
+            and root is not None
+            and args.command != "doctor"
+        ):
+            try:
+                (root / ".pythonlings_debug.log").write_text(
+                    f"argv={argv if argv is not None else sys.argv[1:]!r}\n",
+                    encoding="utf-8",
+                )
+            except OSError:
+                pass
+
+        if args.command == "init":
+            return _cmd_init(args.path, args.force)
+        if args.command == "update":
+            assert update_root is not None
+            return _cmd_update(update_root)
+
+        assert root is not None
+        if args.command == "verify":
+            return _cmd_verify(root, args.topic)
+        if args.command == "list":
+            return _cmd_list(root, args.topic)
+        if args.command == "hint":
+            return _cmd_hint(root, args.name)
+        if args.command == "run":
+            return _cmd_run(root, args.name)
+        if args.command == "dry-run":
+            return _cmd_run(root, args.name)
+        if args.command in {"solution", "sol"}:
+            return _cmd_solution(root, args.name)
+        if args.command == "reset":
+            return _cmd_reset(root, args.name, args.yes)
+        if args.command == "doctor":
+            return _cmd_doctor(root)
+
+        if args.command in (None, "watch", "start", "topics"):
+            start_topic = getattr(args, "topic", None)
+            if start_topic is not None:
+                from pythonlings.core.manifest import load as load_manifest
+                if _resolve_topic(load_manifest(root), start_topic) is None:
+                    return 2
+            from pythonlings.app import run_tui  # lazy: Textual is heavy
+            return run_tui(
+                root,
+                start_topic,
+                force_picker=args.command == "topics",
+            )
+
+        # Other subcommands wired in later tasks.
+        sys.stderr.write(f"pythonlings: '{args.command}' not implemented yet\n")
+        return 1
+    except Exception as e:
+        # Manifest errors and other startup failures use exit code 2.
+        from pythonlings.core.manifest import ManifestError
+        if isinstance(e, ManifestError):
+            sys.stderr.write(f"pythonlings: {e}\n")
+            return 2
+        raise

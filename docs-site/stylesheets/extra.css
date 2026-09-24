@@ -1,0 +1,30 @@
+:root {
+  --md-primary-fg-color:        #3776AB;
+  --md-primary-fg-color--light: #4f8fc0;
+  --md-primary-fg-color--dark:  #2b5d88;
+  --md-accent-fg-color:         #d9a400;   /* readable amber on light */
+  --md-typeset-a-color:         #3776AB;
+}
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #4f8fc0;
+  --md-accent-fg-color:  #FFD43B;
+  --md-typeset-a-color:  #7fc1ff;
+}
+/* Hero (consumed by index.md in Task 3) */
+.pl-hero { text-align: center; padding: 2.5rem 1rem 1rem; }
+.pl-eyebrow { font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  font-size: .72rem; color: var(--md-primary-fg-color); }
+.pl-title { font-size: 2.2rem; line-height: 1.15; font-weight: 800; margin: .6rem auto .4rem;
+  max-width: 18ch; }
+.pl-subtitle { font-size: 1.05rem; color: var(--md-default-fg-color--light);
+  max-width: 46ch; margin: 0 auto 1.2rem; }
+.pl-install { display: inline-block; font-family: var(--md-code-font-family); font-weight: 600;
+  background: #0F2436; color: #FFD43B; padding: .6rem .9rem; border-radius: 8px; }
+.pl-ctas { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin: 1.1rem 0; }
+.pl-btn { display: inline-block; font-weight: 700; padding: .65rem 1.1rem; border-radius: 8px;
+  background: var(--md-primary-fg-color); color: #fff !important; }
+.pl-btn--ghost { background: transparent; color: var(--md-primary-fg-color) !important;
+  border: 1.5px solid var(--md-primary-fg-color); }
+.pl-stats { display: flex; gap: 1.4rem; justify-content: center; flex-wrap: wrap;
+  font-weight: 600; color: var(--md-default-fg-color--light); margin-top: .4rem; }
+.pl-stats b { color: var(--md-primary-fg-color); }

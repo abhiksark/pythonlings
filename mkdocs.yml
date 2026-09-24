@@ -1,0 +1,80 @@
+# mkdocs.yml
+site_name: Pythonlings
+site_url: https://pythonlings.abhik.ai/
+site_description: Python learnings, Rustlings-style, in a terminal TUI.
+repo_url: https://github.com/abhiksark/pythonlings
+repo_name: abhiksark/pythonlings
+edit_uri: edit/main/docs-site/
+docs_dir: docs-site
+
+theme:
+  name: material
+  language: en
+  logo: assets/logo.png
+  favicon: assets/favicon.png
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - content.tabs.link
+    - search.highlight
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+
+plugins:
+  - search
+  - social:
+      enabled: !ENV [CI, false]
+
+nav:
+  - Home: index.md
+  - Quick Start: quick-start.md
+  - How It Works: how-it-works.md
+  - Interface: interface.md
+  - Curriculum: curriculum.md
+  - Local Docs: local-docs.md
+  - FAQ: faq.md
+  - Contributing: contributing.md
+  - Roadmap: roadmap.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/abhiksark/pythonlings
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/pythonlings/
+
+copyright: Copyright &copy; 2026 Pythonlings · MIT License
+
+extra_css:
+  - stylesheets/extra.css

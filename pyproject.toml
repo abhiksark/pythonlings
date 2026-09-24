@@ -1,0 +1,83 @@
+# pyproject.toml
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pythonlings"
+version = "0.4.4"
+description = "Python learnings, Rustlings-style, in a terminal TUI."
+readme = "Readme.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Abhik Sarkar", email = "hello@abhik.ai" }]
+maintainers = [{ name = "Abhik Sarkar", email = "hello@abhik.ai" }]
+keywords = [
+    "python",
+    "python-exercises",
+    "learn-python",
+    "pythonlings",
+    "beginner-python",
+    "coding-practice",
+    "rustlings",
+    "textual",
+    "tui",
+    "cli",
+    "education",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Environment :: Console :: Curses",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Education",
+    "Topic :: Education :: Computer Aided Instruction (CAI)",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "textual[syntax]>=8.0.0",
+    "tomli>=1.1.0; python_version < '3.11'",
+]
+
+[project.urls]
+Homepage = "https://github.com/abhiksark/pythonlings"
+Repository = "https://github.com/abhiksark/pythonlings"
+Issues = "https://github.com/abhiksark/pythonlings/issues"
+Changelog = "https://github.com/abhiksark/pythonlings/blob/main/CHANGELOG.md"
+Documentation = "https://pythonlings.abhik.ai/"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "ruff>=0.6.0",
+]
+
+[project.scripts]
+pythonlings = "pythonlings.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pythonlings"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"pythonlings/pythonlings.tcss" = "pythonlings/pythonlings.tcss"
+"info.toml" = "pythonlings/curriculum/info.toml"
+"exercises" = "pythonlings/curriculum/exercises"
+"checks" = "pythonlings/curriculum/checks"
+"solutions" = "pythonlings/curriculum/solutions"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[tool.ruff.lint.per-file-ignores]
+"checks/**/*.py" = ["F821"]

@@ -1,0 +1,186 @@
+title: "[Exercise] <topic>: <what it teaches>"
+labels: ["curriculum", "proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a tiny broken program.
+
+        **This is a discussion, not an issue.** Anyone can open one, no
+        permissions needed, and nothing here lands in the issue tracker. A
+        maintainer reads accepted proposals and converts them into a scoped
+        issue that you (or anyone) can then claim and implement.
+
+        You do not need working code to propose an idea — a clear concept and a
+        rough sketch is enough to start the conversation. The more of the fields
+        below you can fill in, the faster it can move.
+
+        Conventions live in
+        [CONTRIBUTING.md](https://github.com/abhiksark/pythonlings/blob/main/CONTRIBUTING.md#proposing-a-new-exercise).
+
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic
+      description: >-
+        Which existing topic does this belong to? Topics are directories under
+        `exercises/`. Pick "New topic" only if it genuinely does not fit any of
+        them — a new topic is a bigger change.
+      options:
+        - variables
+        - strings
+        - conditionals
+        - loops
+        - functions
+        - lists
+        - tuples
+        - dictionaries
+        - sets
+        - comprehensions
+        - exceptions
+        - file_io
+        - classes
+        - functional
+        - decorators
+        - generators
+        - context_managers
+        - dataclasses
+        - type_hints
+        - regex
+        - testing
+        - recursion
+        - modules
+        - collections
+        - itertools
+        - json
+        - datetime
+        - enums
+        - pathlib
+        - oop_advanced
+        - async
+        - New topic (explain below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: concept
+    attributes:
+      label: What should the learner come away knowing?
+      description: >-
+        One or two sentences. Name the specific Python behaviour this teaches,
+        and say what a learner would get wrong without it. "Covers dataclasses"
+        is too broad; "that `field(default_factory=list)` is required because a
+        mutable default is shared across instances" is the right size.
+      placeholder: |
+        Teaches that ...
+        Without it a learner would typically assume ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: style
+    attributes:
+      label: How is the program broken?
+      description: >-
+        Exercises break in one of two ways. Placeholders are the common choice
+        for early topics because the file cannot accidentally pass — it is a
+        SyntaxError until filled in. A deliberate bug suits later topics where
+        the code should run but produce the wrong answer.
+      options:
+        - "??? placeholders the learner fills in"
+        - "Complete but buggy code the learner repairs"
+        - Not sure yet
+    validations:
+      required: true
+
+  - type: textarea
+    id: exercise
+    attributes:
+      label: Draft exercise file
+      description: >-
+        A sketch is fine. Keep it self-contained — exercise files are copied
+        into every learner workspace, so they cannot import from the repository.
+        Leave the `# I AM NOT DONE` marker in place; it is what gates
+        advancement.
+      render: python
+      placeholder: |
+        # Exercise: Dataclasses 9
+        # I AM NOT DONE
+        #
+        # Give each Basket its own items list.
+
+        from dataclasses import dataclass, field
+
+        @dataclass
+        class Basket:
+            items: list = ???
+    validations:
+      required: false
+
+  - type: textarea
+    id: check
+    attributes:
+      label: Draft check file
+      description: >-
+        Bare module-level asserts that read the exercise's names directly — no
+        test function, no importing the exercise. Every assert needs a message
+        that states the expected value, and ends with `print("<name> ✓")`.
+      render: python
+      placeholder: |
+        a = Basket()
+        b = Basket()
+        a.items.append("apple")
+        assert b.items == [], (
+            "each Basket should get its own list, so b.items should still be []"
+        )
+        print("dataclasses9 ✓")
+    validations:
+      required: false
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Reference solution
+      description: >-
+        The completed code that makes the check pass. Every exercise needs one —
+        it is executed in CI against your check, so a proposal without a working
+        solution cannot ship.
+      render: python
+    validations:
+      required: false
+
+  - type: input
+    id: hint
+    attributes:
+      label: Hint
+      description: >-
+        One line shown when the learner presses F1. Point at the idea without
+        giving the answer away.
+      placeholder: "A mutable default is shared by every instance; default_factory makes a fresh one."
+    validations:
+      required: false
+
+  - type: input
+    id: docs
+    attributes:
+      label: Documentation URL
+      description: >-
+        A `https://docs.python.org/3/...` link covering the concept. This is
+        what `F5` and `O` open, and it must be on docs.python.org.
+      placeholder: "https://docs.python.org/3/library/dataclasses.html#mutable-default-values"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: conventions
+    attributes:
+      label: Before you post
+      options:
+        - label: >-
+            I have checked this concept is not already covered by an existing
+            exercise in this topic.
+          required: true
+        - label: >-
+            I understand a maintainer converts accepted proposals into an issue,
+            and that posting here does not reserve the work.
+          required: true
