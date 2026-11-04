@@ -1,3 +1,4 @@
+# checks/classes/classes9.py
 assert repr(c) == "Color(r=255, g=128, b=0)", f"got {repr(c)!r}"
 assert str(c) == "rgb(255, 128, 0)", (
     "str(c) should stay 'rgb(255, 128, 0)'; add __repr__ without "
