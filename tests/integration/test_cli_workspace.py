@@ -1,5 +1,8 @@
 # tests/integration/test_cli_workspace.py
+import shutil
 from pathlib import Path
+
+import pytest
 
 from pythonlings.core import curriculum
 from pythonlings.cli import main
@@ -80,6 +83,64 @@ def test_init_force_overwrites_existing_workspace(tmp_path: Path) -> None:
         "__pycache__/\n"
         "*.pyc\n"
     )
+
+
+@pytest.mark.parametrize("legacy_state", [False, True])
+def test_force_init_rejects_curriculum_source_without_mutation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys, legacy_state: bool
+) -> None:
+    source = tmp_path / "source"
+    fixture = Path(__file__).parents[1] / "fixtures" / "passing_curriculum"
+    shutil.copytree(
+        fixture, source, ignore=shutil.ignore_patterns(".pythonlings")
+    )
+    if legacy_state:
+        (source / ".pylings").mkdir()
+        (source / ".pylings" / "state.json").write_text(
+            '{"format_version": 2, "completed": ["passing1"]}',
+            encoding="utf-8",
+        )
+    before = {
+        path.relative_to(source): path.read_bytes()
+        for path in source.rglob("*")
+        if path.is_file()
+    }
+    monkeypatch.setattr(curriculum, "source_root", lambda: source)
+
+    code = main(["init", "--path", str(source / "exercises" / ".."), "--force"])
+
+    assert code == 1
+    error = capsys.readouterr().err
+    assert error.startswith("pythonlings:")
+    assert "curriculum source" in error
+    assert "Traceback" not in error
+    after = {
+        path.relative_to(source): path.read_bytes()
+        for path in source.rglob("*")
+        if path.is_file()
+    }
+    assert before == after
+    assert not (source / ".pythonlings").exists()
+
+
+@pytest.mark.parametrize("force", [False, True])
+def test_init_preserves_legacy_progress(tmp_path: Path, force: bool) -> None:
+    root = tmp_path / "workspace"
+    fixture = Path(__file__).parents[1] / "fixtures" / "passing_curriculum"
+    shutil.copytree(
+        fixture, root, ignore=shutil.ignore_patterns(".pythonlings")
+    )
+    (root / ".pylings").mkdir()
+    progress = b'{"format_version": 2, "completed": ["passing1"]}'
+    (root / ".pylings" / "state.json").write_bytes(progress)
+    args = ["init", "--path", str(root)]
+    if force:
+        args.append("--force")
+
+    assert main(args) == 0
+
+    assert not (root / ".pylings").exists()
+    assert (root / ".pythonlings" / "state.json").read_bytes() == progress
 
 
 def test_update_via_path_migrates_legacy_state_dir(tmp_path: Path) -> None:

@@ -134,11 +134,16 @@ def _resolve_topic(manifest, topic: str):
 
 
 def _cmd_init(path: Path, force: bool) -> int:
-    from pythonlings.core.curriculum import WorkspaceError, init_workspace
+    from pythonlings.core.curriculum import (
+        WorkspaceError,
+        init_workspace,
+        migrate_legacy_state_dir,
+    )
     from pythonlings.core.workspace import is_workspace
 
     path = path.expanduser().resolve()
     if is_workspace(path) and not force:
+        migrate_legacy_state_dir(path)
         print(f"Already set up at {path} — just run `pythonlings`")
         return 0
     try:
@@ -351,14 +356,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         root: Path | None = None
         update_root: Path | None = None
-        if args.command == "init":
-            migrate_legacy_state_dir(Path(args.path))
-        elif args.command == "update":
+        if args.command == "update":
             explicit_root = args.path if args.path is not None else args.root
             update_root = resolve_workspace_root(
                 Path.cwd(), explicit_root, create_if_missing=False
             ).root
-        else:
+        elif args.command != "init":
             launches_tui = args.command in (None, "watch", "start", "topics")
             try:
                 resolved = resolve_workspace_root(

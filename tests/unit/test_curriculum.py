@@ -1,4 +1,7 @@
+# tests/unit/test_curriculum.py
 from pathlib import Path
+
+import pytest
 
 from pythonlings.core import curriculum
 
@@ -41,6 +44,25 @@ def test_init_workspace_refuses_non_empty_directory(tmp_path: Path) -> None:
         assert "isn't empty and isn't a pythonlings workspace" in str(exc)
     else:
         raise AssertionError("expected WorkspaceError")
+
+
+def test_force_init_rejects_resolved_curriculum_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "source"
+    (source / "exercises").mkdir(parents=True)
+    manifest = source / "info.toml"
+    manifest.write_text("keep = true\n", encoding="utf-8")
+    marker = source / "exercises" / "keep.py"
+    marker.write_text("# keep me\n", encoding="utf-8")
+    monkeypatch.setattr(curriculum, "source_root", lambda: source)
+
+    with pytest.raises(curriculum.WorkspaceError, match="curriculum source"):
+        curriculum.init_workspace(source / "exercises" / "..", force=True)
+
+    assert manifest.read_text(encoding="utf-8") == "keep = true\n"
+    assert marker.read_text(encoding="utf-8") == "# keep me\n"
+    assert not (source / ".pythonlings").exists()
 
 
 def test_force_init_preserves_existing_gitignore_entries(tmp_path: Path) -> None:
