@@ -2,8 +2,10 @@
 
 from pathlib import Path
 
+import pytest
+
 from pythonlings.core.exercise import Exercise
-from pythonlings.core.runner import run
+from pythonlings.core.runner import run, run_verify
 
 CURRICULUM = Path(__file__).parent.parent / "fixtures" / "tiny_curriculum"
 EXERCISES = CURRICULUM / "exercises"
@@ -80,6 +82,48 @@ def test_utf8_output(tmp_path: Path) -> None:
     result = run(ex)
     assert result.passed is True
     assert "héllo 🐍" in result.stdout
+
+
+@pytest.mark.parametrize("runner", [run, run_verify])
+def test_invalid_utf8_exercise_returns_failure(tmp_path: Path, runner) -> None:
+    exercise = _tmp_ex(tmp_path, "", "assert True\n")
+    exercise.path.write_bytes(b"\xff")
+
+    result = runner(exercise)
+
+    assert not result.passed
+    assert result.exit_code != 0
+    assert not result.timed_out
+    assert "UTF-8" in result.stderr
+    assert exercise.name in result.stderr
+    assert str(exercise.path) in result.stderr
+    assert "Traceback" not in result.stderr
+    assert exercise.path.read_bytes() == b"\xff"
+
+
+@pytest.mark.parametrize("runner", [run, run_verify])
+def test_invalid_utf8_check_returns_failure(tmp_path: Path, runner) -> None:
+    exercise = _tmp_ex(tmp_path, "x = 1\n")
+    exercise.check_path.write_bytes(b"\xff")
+
+    result = runner(exercise)
+
+    assert not result.passed
+    assert result.exit_code != 0
+    assert not result.timed_out
+    assert "UnicodeDecodeError" in result.stderr
+
+
+def test_unreadable_exercise_returns_failure(tmp_path: Path) -> None:
+    exercise = _tmp_ex(tmp_path, "")
+    exercise.path.unlink()
+
+    result = run(exercise)
+
+    assert not result.passed
+    assert result.exit_code != 0
+    assert not result.timed_out
+    assert str(exercise.path) in result.stderr
 
 
 def test_runner_uses_workspace_for_relative_files(tmp_path: Path) -> None:

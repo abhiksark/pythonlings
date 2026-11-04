@@ -27,7 +27,21 @@ def run(exercise: Exercise, timeout_s: float = DEFAULT_TIMEOUT_S) -> RunResult:
         "PYTHONDONTWRITEBYTECODE": "1",
         "PYTHONIOENCODING": "utf-8",
     }
-    exercise_src = exercise_path.read_text(encoding="utf-8")
+    try:
+        exercise_src = exercise_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as error:
+        return RunResult(
+            passed=False,
+            exit_code=-1,
+            stdout="",
+            stderr=(
+                f"pythonlings: could not read exercise {exercise.name!r} "
+                f"at {exercise_path} as UTF-8: {error}\n"
+                "Check that the file is readable and saved as UTF-8.\n"
+            ),
+            duration_s=time.monotonic() - start,
+            timed_out=False,
+        )
     runner_src = (
         "import sys\n"
         "from pathlib import Path\n"

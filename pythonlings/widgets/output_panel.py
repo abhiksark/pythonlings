@@ -145,7 +145,11 @@ class OutputPanel(Vertical):
         )
 
     def _goal_from(self, exercise: Exercise) -> str:
-        for line in exercise.path.read_text(encoding="utf-8").splitlines()[:12]:
+        try:
+            lines = exercise.path.read_text(encoding="utf-8").splitlines()[:12]
+        except (OSError, UnicodeError):
+            return exercise.name
+        for line in lines:
             stripped = line.strip()
             if stripped.startswith("# Goal:"):
                 return stripped.removeprefix("# Goal:").strip()

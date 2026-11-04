@@ -46,6 +46,55 @@ async def test_default_launch_opens_first_pending_exercise(tmp_path: Path) -> No
 
 
 @pytest.mark.asyncio
+async def test_invalid_utf8_exercise_stays_open_without_overwriting(
+    tmp_path: Path,
+) -> None:
+    work = _work_copy(tmp_path)
+    exercise_path = work / "exercises" / "alpha" / "a1.py"
+    exercise_path.write_bytes(b"\xff")
+    app = PythonlingsApp(root=work)
+
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        assert isinstance(app.screen, TrackScreen)
+        assert app.screen.current == "a1"
+        rendered = app.screen.query_one(OutputPanel).renderable_text()
+        assert "UTF-8" in rendered
+        assert "a1" in rendered
+        assert str(exercise_path) in rendered
+        assert "a1" not in app.state.completed
+        assert app.screen.query_one("#code", TextArea).read_only
+        await pilot.press("x")
+        await pilot.pause(0.8)
+        await pilot.press("ctrl+q")
+
+    assert exercise_path.read_bytes() == b"\xff"
+
+
+@pytest.mark.asyncio
+async def test_advance_to_invalid_utf8_exercise_preserves_its_bytes(
+    tmp_path: Path,
+) -> None:
+    work = _work_copy(tmp_path)
+    (work / "exercises" / "alpha" / "a1.py").write_text(
+        "x = 1\n", encoding="utf-8"
+    )
+    exercise_path = work / "exercises" / "alpha" / "a2.py"
+    exercise_path.write_bytes(b"\xff")
+    app = PythonlingsApp(root=work)
+
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        assert app.screen.current == "a2"
+        assert app.screen.query_one("#code", TextArea).text == ""
+        assert "UTF-8" in app.screen.query_one(OutputPanel).renderable_text()
+        await pilot.pause(0.8)
+        await pilot.press("f4")
+
+    assert exercise_path.read_bytes() == b"\xff"
+
+
+@pytest.mark.asyncio
 async def test_picker_lists_topics_with_progress(tmp_path: Path) -> None:
     app = PythonlingsApp(root=_work_copy(tmp_path), force_picker=True)
     async with app.run_test() as pilot:
