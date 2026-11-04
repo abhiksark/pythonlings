@@ -1,4 +1,4 @@
+# checks/oop_advanced/oop_advanced5.py
 playlist = Playlist(["one", "two", "three"])
-count = len(playlist)
-assert count == 3, f"expected len(playlist) == 3, got {count!r}"
+assert len(playlist) == 3, "len(playlist) should be 3"
 print("oop_advanced5 ok")

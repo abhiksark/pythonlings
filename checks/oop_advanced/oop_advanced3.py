@@ -1,4 +1,4 @@
+# checks/oop_advanced/oop_advanced3.py
 shapes = [Square(3), Rectangle(2, 5)]
-area = total_area(shapes)
-assert area == 19, f"expected total_area(shapes) == 19, got {area!r}"
+assert total_area(shapes) == 19, "total_area(shapes) should be 19"
 print("oop_advanced3 ok")

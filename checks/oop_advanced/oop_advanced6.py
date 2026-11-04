@@ -1,5 +1,5 @@
-text = repr(Point(2, 5))
-assert text == "Point(x=2, y=5)", (
-    f"expected repr 'Point(x=2, y=5)', got {text!r}"
+# checks/oop_advanced/oop_advanced6.py
+assert repr(Point(2, 5)) == "Point(x=2, y=5)", (
+    "repr(Point(2, 5)) should be 'Point(x=2, y=5)'"
 )
 print("oop_advanced6 ok")
