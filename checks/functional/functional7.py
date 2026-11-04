@@ -1,3 +1,4 @@
+# checks/functional/functional7.py
 triple = make_multiplier(3)
 double = make_multiplier(2)
 

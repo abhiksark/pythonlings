@@ -1,3 +1,4 @@
+# checks/functional/functional8.py
 assert product == 120, f"product should be 120, got {product}"
 
 from functools import reduce
