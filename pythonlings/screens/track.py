@@ -68,7 +68,7 @@ class TrackScreen(Screen[None]):
         Binding("f4", "topics", "Topics"),
         Binding("f5", "docs", "Docs"),
         Binding("escape", "quit", "Quit", priority=True),
-        Binding("ctrl+q", "quit", "Quit"),
+        Binding("ctrl+q", "quit", "Quit", priority=True),
     ]
 
     def __init__(self, topic: str, start_exercise: str | None = None) -> None:
@@ -76,7 +76,7 @@ class TrackScreen(Screen[None]):
         self.topic = topic
         self._start_exercise = start_exercise
         self._save_timer: Timer | None = None
-        self._loaded_text = ""
+        self._persisted_text = ""
         self._failure_counts: dict[str, int] = {}
         self.current: str | None = None
 
@@ -152,7 +152,7 @@ class TrackScreen(Screen[None]):
         self.query_one(OutputPanel).reset_hint()
         pane = self.query_one(EditorPane)
         pane.load_exercise(self._exercise(self.current))
-        self._loaded_text = pane.text
+        self._persisted_text = pane.text
         self._failure_counts[self.current] = 0
         self._record_resume(self.current)
 
@@ -165,7 +165,7 @@ class TrackScreen(Screen[None]):
     def on_text_area_changed(self, event: TextArea.Changed) -> None:
         if event.text_area is not self.query_one("#code", TextArea):
             return
-        if self.query_one(EditorPane).text == self._loaded_text:
+        if self.query_one(EditorPane).text == self._persisted_text:
             return
         if self._save_timer is not None:
             self._save_timer.stop()
@@ -176,7 +176,9 @@ class TrackScreen(Screen[None]):
         if self.current is None:
             return
         ex = self._exercise(self.current)
-        ex.path.write_text(self.query_one(EditorPane).text, encoding="utf-8")
+        text = self.query_one(EditorPane).text
+        ex.path.write_text(text, encoding="utf-8")
+        self._persisted_text = text
         self._run_current()
 
     def _run_current(self) -> None:
@@ -280,6 +282,8 @@ class TrackScreen(Screen[None]):
             self._save_timer.stop()
             self._save_timer = None
             if self.current is not None:
+                text = self.query_one(EditorPane).text
                 self._exercise(self.current).path.write_text(
-                    self.query_one(EditorPane).text, encoding="utf-8"
+                    text, encoding="utf-8"
                 )
+                self._persisted_text = text

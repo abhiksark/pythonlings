@@ -39,6 +39,14 @@ class PythonlingsApp(App[int]):
 
             self.push_screen(WelcomeScreen())
 
+    def action_quit(self) -> None:
+        """Flush an active exercise before handling the app-level quit key."""
+        for screen in reversed(self.screen_stack):
+            if isinstance(screen, TrackScreen):
+                screen.action_quit()
+                return
+        self.exit(0)
+
     def _startup_target(self) -> tuple[str, str | None] | None:
         if self._start_topic is not None:
             if self._start_topic in self.manifest.topics():
