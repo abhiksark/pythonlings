@@ -37,6 +37,56 @@ def test_is_pending_marker_inside_string_still_counts(tmp_path: Path) -> None:
     assert _ex(file).is_pending() is True
 
 
+def test_strip_marker_removes_marker_line(tmp_path: Path) -> None:
+    """strip_marker deletes the marker line and keeps the rest intact."""
+    ex = _ex(tmp_path / "ex.py")
+    stripped = ex.strip_marker("# I AM NOT DONE\nx = 1\n")
+    assert stripped == "x = 1\n"
+
+
+def test_strip_marker_leaves_marker_inside_string_untouched(
+    tmp_path: Path,
+) -> None:
+    """A marker embedded in a string literal is not a real marker line."""
+    ex = _ex(tmp_path / "ex.py")
+    text = 's = "# I AM NOT DONE"\n'
+    assert ex.strip_marker(text) == text
+
+
+def test_strip_marker_noop_when_marker_absent(tmp_path: Path) -> None:
+    """Stripping text with no marker line returns it unchanged."""
+    ex = _ex(tmp_path / "ex.py")
+    text = "x = 1\n"
+    assert ex.strip_marker(text) == text
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ('s = """\n# I AM NOT DONE\n"""\n', 's = """\n# I AM NOT DONE\n"""\n'),
+        (
+            '# I AM NOT DONE\ns = """\n# I AM NOT DONE\n"""\n',
+            's = """\n# I AM NOT DONE\n"""\n',
+        ),
+        ("# I AM NOT DONE\r\nx = 1\r\n", "x = 1\r\n"),
+        ('# I AM NOT DONE\ns = """\n', '# I AM NOT DONE\ns = """\n'),
+        ("x = 1  # I AM NOT DONE\n", "x = 1  # I AM NOT DONE\n"),
+        ("  # I AM NOT DONE\nx = 1\n", "x = 1\n"),
+    ],
+)
+def test_strip_marker_preserves_program_text(
+    tmp_path: Path, text: str, expected: str
+) -> None:
+    assert _ex(tmp_path / "ex.py").strip_marker(text) == expected
+
+
+def test_strip_marker_preserves_unicode_line_separators(tmp_path: Path) -> None:
+    literal = 's = """one\u2028two\u2028three\n# I AM NOT DONE\n"""\n'
+    text = literal + "# I AM NOT DONE\nx = 1\n"
+
+    assert _ex(tmp_path / "ex.py").strip_marker(text) == literal + "x = 1\n"
+
+
 def test_exercise_is_frozen() -> None:
     ex = Exercise(
         name="a",

@@ -1,5 +1,7 @@
 # tests/tui/test_app_pilot.py
+import asyncio
 import shutil
+import threading
 import webbrowser
 from pathlib import Path
 
@@ -8,11 +10,13 @@ from textual.widgets import Footer, Markdown, Static, TextArea
 from textual.worker import WorkerCancelled
 
 from pythonlings.app import PythonlingsApp
+from pythonlings.core.exercise import RunResult
 from pythonlings.core.state import State
 from pythonlings.core.state import save as save_state
+from pythonlings.screens import track as track_module
 from pythonlings.screens.docs import DocsScreen
 from pythonlings.screens.topic_picker import TopicPickerScreen
-from pythonlings.screens.track import TrackScreen
+from pythonlings.screens.track import _AUTO_ADVANCE_SECONDS, TrackScreen
 from pythonlings.widgets.output_panel import OutputPanel
 
 MULTI = Path(__file__).parent.parent / "fixtures" / "multi_topic"
@@ -419,6 +423,110 @@ async def test_instant_advance_updates_resume_to_next_exercise(
 
 
 @pytest.mark.asyncio
+async def test_marker_pass_schedules_auto_advance(tmp_path: Path) -> None:
+    """Checks passing with the marker still present starts the countdown."""
+    work = _work_copy(tmp_path)
+    app = PythonlingsApp(root=work, start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        assert isinstance(track, TrackScreen)
+        track.query_one("#code", TextArea).text = "# I AM NOT DONE\nx = 1\n"
+        track._flush_and_run()
+        await _settle(pilot)
+        assert "a1" not in app.state.completed
+        assert track.current == "a1"
+        assert track._advance_timer is not None
+        assert (
+            f"advancing to the next exercise in {_AUTO_ADVANCE_SECONDS}s"
+            in track.query_one(OutputPanel).renderable_text().lower()
+        )
+
+
+@pytest.mark.asyncio
+async def test_auto_advance_countdown_ticks_down_each_second(
+    tmp_path: Path,
+) -> None:
+    """Each tick decrements the countdown and updates the panel text."""
+    work = _work_copy(tmp_path)
+    app = PythonlingsApp(root=work, start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        assert isinstance(track, TrackScreen)
+        track.query_one("#code", TextArea).text = "# I AM NOT DONE\nx = 1\n"
+        track._flush_and_run()
+        await _settle(pilot)
+        assert track._advance_remaining == _AUTO_ADVANCE_SECONDS
+
+        track._tick_advance()
+        await pilot.pause()
+        assert track._advance_remaining == _AUTO_ADVANCE_SECONDS - 1
+        assert (
+            f"advancing to the next exercise in {_AUTO_ADVANCE_SECONDS - 1}s"
+            in track.query_one(OutputPanel).renderable_text().lower()
+        )
+
+        for _ in range(_AUTO_ADVANCE_SECONDS - 2):
+            track._tick_advance()
+        await pilot.pause()
+        assert track._advance_remaining == 1
+        assert "a1" not in app.state.completed
+
+        track._tick_advance()  # remaining hits 0: fires the auto-advance
+        await _settle(pilot)
+        assert "a1" in app.state.completed
+        assert track.current == "a2"
+
+
+@pytest.mark.asyncio
+async def test_auto_advance_fires_strips_marker_and_advances(
+    tmp_path: Path,
+) -> None:
+    """When the countdown fires, the marker is stripped on disk and advances."""
+    work = _work_copy(tmp_path)
+    app = PythonlingsApp(root=work, start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        assert isinstance(track, TrackScreen)
+        checked_text = "# I AM NOT DONE\nx = 1\n"
+        track.query_one("#code", TextArea).text = checked_text
+        track._flush_and_run()
+        await _settle(pilot)
+        # Simulate the auto-advance timer firing rather than waiting on it.
+        track._auto_advance(track._exercise("a1"), checked_text)
+        await _settle(pilot)
+        assert "a1" in app.state.completed
+        assert track.current == "a2"
+        assert "# I AM NOT DONE" not in (
+            work / "exercises" / "alpha" / "a1.py"
+        ).read_text(encoding="utf-8")
+
+
+@pytest.mark.asyncio
+async def test_editing_during_countdown_cancels_auto_advance(
+    tmp_path: Path,
+) -> None:
+    """Resuming an edit mid-countdown cancels the auto-advance timer."""
+    work = _work_copy(tmp_path)
+    app = PythonlingsApp(root=work, start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        assert isinstance(track, TrackScreen)
+        track.query_one("#code", TextArea).text = "# I AM NOT DONE\nx = 1\n"
+        track._flush_and_run()
+        await _settle(pilot)
+        assert track._advance_timer is not None
+        track.query_one("#code", TextArea).text = "# I AM NOT DONE\nx = 2\n"
+        await _settle(pilot)
+        assert track._advance_timer is None
+        assert "a1" not in app.state.completed
+        assert track.current == "a1"
+
+
+@pytest.mark.asyncio
 async def test_failed_run_shows_progressive_nudge(tmp_path: Path) -> None:
     work = _work_copy(tmp_path)
     app = PythonlingsApp(root=work, start_topic="alpha")
@@ -430,6 +538,98 @@ async def test_failed_run_shows_progressive_nudge(tmp_path: Path) -> None:
         track._flush_and_run()
         await _settle(pilot)
         assert "alpha one" in track.query_one(OutputPanel).renderable_text()
+
+
+@pytest.mark.asyncio
+async def test_inflight_pass_does_not_check_new_editor_text(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    started, release = threading.Event(), threading.Event()
+
+    def delayed_pass(exercise):
+        started.set()
+        assert release.wait(timeout=5)
+        return RunResult(False, 0, "ok", "", 0.1, False)
+
+    app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        editor = track.query_one("#code", TextArea)
+        monkeypatch.setattr(track_module, "run_exercise", delayed_pass)
+        monkeypatch.setattr(track_module, "_DEBOUNCE_SECONDS", 60)
+        editor.text = "# I AM NOT DONE\nx = 1\n"
+        track._flush_and_run()
+        try:
+            assert await asyncio.to_thread(started.wait, 5)
+            editor.text = "# I AM NOT DONE\nx = 99\n"
+            await pilot.pause()
+        finally:
+            release.set()
+        await _settle(pilot)
+        assert track._advance_timer is None
+        assert track.current == "a1"
+        assert "a1" not in app.state.completed
+
+
+@pytest.mark.asyncio
+async def test_marker_in_string_does_not_start_countdown(
+    tmp_path: Path,
+) -> None:
+    app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        text = 'message = """\n# I AM NOT DONE\n"""\nx = 1\n'
+        track.query_one("#code", TextArea).text = text
+        track._flush_and_run()
+        await _settle(pilot)
+        assert track._advance_timer is None
+        assert track._exercise("a1").path.read_text(encoding="utf-8") == text
+        assert (
+            "remove" in track.query_one(OutputPanel).renderable_text().lower()
+        )
+
+
+@pytest.mark.asyncio
+async def test_cancelled_old_pass_cannot_replace_a_newer_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    started, release = threading.Event(), threading.Event()
+
+    def controlled_run(exercise):
+        if exercise.path.read_text(encoding="utf-8").endswith("x = 1\n"):
+            started.set()
+            assert release.wait(timeout=5)
+            return RunResult(False, 0, "ok", "", 0.1, False)
+        return RunResult(False, 1, "", "expected x = 1", 0.1, False)
+
+    app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        editor = track.query_one("#code", TextArea)
+        monkeypatch.setattr(track_module, "run_exercise", controlled_run)
+        monkeypatch.setattr(track_module, "_DEBOUNCE_SECONDS", 60)
+        checked = "# I AM NOT DONE\nx = 1\n"
+        editor.text = checked
+        track._flush_and_run()
+        try:
+            assert await asyncio.to_thread(started.wait, 5)
+            editor.text = "# I AM NOT DONE\nx = 99\n"
+            track._flush_and_run()
+            await _settle(pilot)
+            assert "expected x = 1" in (
+                track.query_one(OutputPanel).renderable_text()
+            )
+            editor.text = checked
+            await pilot.pause()
+        finally:
+            release.set()
+        await _settle(pilot)
+        assert track._advance_timer is None
+        assert track.current == "a1"
+        assert "a1" not in app.state.completed
 
 
 @pytest.mark.asyncio
