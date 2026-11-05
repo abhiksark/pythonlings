@@ -86,6 +86,7 @@ include = ["*.py", "*.pyi", "pyproject.toml"]
 extend-exclude = [
     "exercises",
     "solutions",
+    "checks",
     "tests/fixtures",
 ]
 

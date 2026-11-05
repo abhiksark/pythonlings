@@ -71,9 +71,14 @@ ruff check .
 ruff format --check .
 ```
 
-Ruff currently runs in advisory mode while existing violations are addressed
-incrementally. New and modified Python files should follow its lint and format
-output.
+Both commands are required CI checks. Ruff targets Python 3.9 and the documented
+80-character line limit, with import sorting and Python error checks enabled.
+
+The gate covers production code, scripts, and test code. It excludes learner
+exercises, reference solutions, shared-namespace curriculum checks, and
+intentionally invalid test fixtures. Those files have different execution and
+teaching requirements. Curriculum checks are validated by the reference-solution
+suite; their separate style cleanup is tracked in #133.
 
 ## Curriculum Changes
 
