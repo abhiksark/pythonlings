@@ -1,6 +1,8 @@
 # pythonlings/core/exercise.py
 from __future__ import annotations
 
+import io
+import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -21,6 +23,27 @@ class Exercise:
 
     def is_pending(self) -> bool:
         return self.DONE_MARKER in self.path.read_text(encoding="utf-8")
+
+    def strip_marker(self, text: str) -> str:
+        """Remove standalone marker comments while preserving program text."""
+        lines = text.splitlines(keepends=True)
+        try:
+            markers = {
+                token.start[0]
+                for token in tokenize.generate_tokens(
+                    io.StringIO(text).readline
+                )
+                if token.type == tokenize.COMMENT
+                and token.string.strip() == self.DONE_MARKER
+                and lines[token.start[0] - 1].strip() == self.DONE_MARKER
+            }
+        except (tokenize.TokenError, IndentationError):
+            return text
+        return "".join(
+            line
+            for number, line in enumerate(lines, 1)
+            if number not in markers
+        )
 
 
 @dataclass
