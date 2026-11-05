@@ -80,6 +80,13 @@ def test_strip_marker_preserves_program_text(
     assert _ex(tmp_path / "ex.py").strip_marker(text) == expected
 
 
+def test_strip_marker_preserves_unicode_line_separators(tmp_path: Path) -> None:
+    literal = 's = """one\u2028two\u2028three\n# I AM NOT DONE\n"""\n'
+    text = literal + "# I AM NOT DONE\nx = 1\n"
+
+    assert _ex(tmp_path / "ex.py").strip_marker(text) == literal + "x = 1\n"
+
+
 def test_exercise_is_frozen() -> None:
     ex = Exercise(
         name="a",

@@ -26,7 +26,8 @@ class Exercise:
 
     def strip_marker(self, text: str) -> str:
         """Remove standalone marker comments while preserving program text."""
-        lines = text.splitlines(keepends=True)
+        # Token rows count newlines, not Unicode separators inside strings.
+        lines = io.StringIO(text).readlines()
         try:
             markers = {
                 token.start[0]
