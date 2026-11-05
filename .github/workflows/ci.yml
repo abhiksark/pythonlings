@@ -1,3 +1,4 @@
+# .github/workflows/ci.yml
 name: ci
 
 on:
@@ -6,6 +7,20 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install development dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Check lint with Ruff
+        run: ruff check .
+      - name: Check formatting with Ruff
+        run: ruff format --check .
+
   test:
     name: ${{ matrix.os }} py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
