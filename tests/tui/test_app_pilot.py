@@ -8,7 +8,8 @@ from textual.widgets import Footer, Markdown, Static, TextArea
 from textual.worker import WorkerCancelled
 
 from pythonlings.app import PythonlingsApp
-from pythonlings.core.state import State, save as save_state
+from pythonlings.core.state import State
+from pythonlings.core.state import save as save_state
 from pythonlings.screens.docs import DocsScreen
 from pythonlings.screens.topic_picker import TopicPickerScreen
 from pythonlings.screens.track import TrackScreen
@@ -36,13 +37,64 @@ async def _settle(pilot) -> None:
 
 
 @pytest.mark.asyncio
-async def test_default_launch_opens_first_pending_exercise(tmp_path: Path) -> None:
+async def test_default_launch_opens_first_pending_exercise(
+    tmp_path: Path,
+) -> None:
     app = PythonlingsApp(root=_work_copy(tmp_path))
     async with app.run_test() as pilot:
         await _settle(pilot)
         assert isinstance(app.screen, TrackScreen)
         assert app.screen.topic == "alpha"
         assert app.screen.current == "a1"
+
+
+@pytest.mark.asyncio
+async def test_invalid_utf8_exercise_stays_open_without_overwriting(
+    tmp_path: Path,
+) -> None:
+    work = _work_copy(tmp_path)
+    exercise_path = work / "exercises" / "alpha" / "a1.py"
+    exercise_path.write_bytes(b"\xff")
+    app = PythonlingsApp(root=work)
+
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        assert isinstance(app.screen, TrackScreen)
+        assert app.screen.current == "a1"
+        rendered = app.screen.query_one(OutputPanel).renderable_text()
+        assert "UTF-8" in rendered
+        assert "a1" in rendered
+        assert str(exercise_path) in rendered
+        assert "a1" not in app.state.completed
+        assert app.screen.query_one("#code", TextArea).read_only
+        await pilot.press("x")
+        await pilot.pause(0.8)
+        await pilot.press("ctrl+q")
+
+    assert exercise_path.read_bytes() == b"\xff"
+
+
+@pytest.mark.asyncio
+async def test_advance_to_invalid_utf8_exercise_preserves_its_bytes(
+    tmp_path: Path,
+) -> None:
+    work = _work_copy(tmp_path)
+    (work / "exercises" / "alpha" / "a1.py").write_text(
+        "x = 1\n", encoding="utf-8"
+    )
+    exercise_path = work / "exercises" / "alpha" / "a2.py"
+    exercise_path.write_bytes(b"\xff")
+    app = PythonlingsApp(root=work)
+
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        assert app.screen.current == "a2"
+        assert app.screen.query_one("#code", TextArea).text == ""
+        assert "UTF-8" in app.screen.query_one(OutputPanel).renderable_text()
+        await pilot.pause(0.8)
+        await pilot.press("f4")
+
+    assert exercise_path.read_bytes() == b"\xff"
 
 
 @pytest.mark.asyncio
@@ -86,13 +138,14 @@ async def test_picker_shows_first_run_start_banner(tmp_path: Path) -> None:
 @pytest.mark.asyncio
 async def test_picker_rows_show_status_labels(tmp_path: Path) -> None:
     work = _work_copy(tmp_path)
-    save_state(work, State(completed={"a1"}, seen_intro=True, last_topic="alpha"))
+    save_state(
+        work, State(completed={"a1"}, seen_intro=True, last_topic="alpha")
+    )
     app = PythonlingsApp(root=work, force_picker=True)
     async with app.run_test() as pilot:
         await _settle(pilot)
         rendered = " ".join(
-            str(row.content)
-            for row in app.screen.query(".topic-row").results()
+            str(row.content) for row in app.screen.query(".topic-row").results()
         )
         assert "Continue" in rendered
         assert "Start" in rendered
@@ -108,7 +161,9 @@ async def test_start_topic_opens_track(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_default_launch_resumes_last_incomplete_exercise(tmp_path: Path) -> None:
+async def test_default_launch_resumes_last_incomplete_exercise(
+    tmp_path: Path,
+) -> None:
     work = _work_copy(tmp_path)
     save_state(
         work,
@@ -123,7 +178,9 @@ async def test_default_launch_resumes_last_incomplete_exercise(tmp_path: Path) -
 
 
 @pytest.mark.asyncio
-async def test_default_launch_falls_back_from_invalid_resume_state(tmp_path: Path) -> None:
+async def test_default_launch_falls_back_from_invalid_resume_state(
+    tmp_path: Path,
+) -> None:
     work = _work_copy(tmp_path)
     save_state(
         work,
@@ -192,9 +249,7 @@ async def test_narrow_layout_keeps_navigation_discoverable_and_usable(
         await pilot.pause()
         assert isinstance(app.screen, TopicPickerScreen)
         picker_footer = app.screen.query_one(Footer)
-        picker_keys = {
-            key.key: key for key in picker_footer.query("FooterKey")
-        }
+        picker_keys = {key.key: key for key in picker_footer.query("FooterKey")}
         escape_key = picker_keys["escape"]
         assert escape_key.region.x >= picker_footer.region.x
         assert escape_key.region.right <= picker_footer.region.right
@@ -205,7 +260,9 @@ async def test_narrow_layout_keeps_navigation_discoverable_and_usable(
 
 
 @pytest.mark.asyncio
-async def test_normal_width_footer_keeps_all_track_labels(tmp_path: Path) -> None:
+async def test_normal_width_footer_keeps_all_track_labels(
+    tmp_path: Path,
+) -> None:
     app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
     async with app.run_test(size=(80, 24)) as pilot:
         await _settle(pilot)
@@ -288,14 +345,18 @@ async def test_f5_opens_docs_popup_for_current_exercise(tmp_path: Path) -> None:
         assert "Local reference" in rendered
         assert "# Variables" not in rendered
         assert "Assigning names" in rendered
-        assert "https://docs.python.org/3/tutorial/introduction.html" in rendered
+        assert (
+            "https://docs.python.org/3/tutorial/introduction.html" in rendered
+        )
         footer = app.screen.query_one("#docs-footer", Static).content
         assert "O Open official docs" in str(footer)
         assert "Esc Close" in str(footer)
 
 
 @pytest.mark.asyncio
-async def test_escape_closes_docs_popup_without_quitting(tmp_path: Path) -> None:
+async def test_escape_closes_docs_popup_without_quitting(
+    tmp_path: Path,
+) -> None:
     app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
     async with app.run_test() as pilot:
         await _settle(pilot)
@@ -322,7 +383,9 @@ async def test_docs_popup_can_open_browser(
         assert isinstance(app.screen, DocsScreen)
         await pilot.press("o")
         await pilot.pause()
-        assert opened == ["https://docs.python.org/3/tutorial/introduction.html"]
+        assert opened == [
+            "https://docs.python.org/3/tutorial/introduction.html"
+        ]
 
 
 @pytest.mark.asyncio
@@ -370,6 +433,115 @@ async def test_failed_run_shows_progressive_nudge(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("leave_key", ["f4", "escape", "ctrl+q"])
+async def test_revert_to_loaded_text_is_persisted_when_leaving(
+    tmp_path: Path, leave_key: str
+) -> None:
+    work = _work_copy(tmp_path)
+    exercise_path = work / "exercises" / "alpha" / "a1.py"
+    original_text = exercise_path.read_text(encoding="utf-8")
+    app = PythonlingsApp(root=work, start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        assert isinstance(track, TrackScreen)
+        editor = track.query_one("#code", TextArea)
+
+        editor.text = "x = 99\n"
+        await pilot.pause(0.7)
+        await _settle(pilot)
+        assert exercise_path.read_text(encoding="utf-8") == "x = 99\n"
+
+        editor.text = original_text
+        await pilot.pause()
+        await pilot.press(leave_key)
+        await pilot.pause()
+
+        assert editor.text == original_text
+        assert exercise_path.read_text(encoding="utf-8") == original_text
+        if leave_key == "f4":
+            assert isinstance(app.screen, TopicPickerScreen)
+        else:
+            assert app.return_code == 0
+
+
+@pytest.mark.asyncio
+async def test_revert_is_persisted_when_quitting_from_docs(
+    tmp_path: Path,
+) -> None:
+    work = _work_copy(tmp_path)
+    exercise_path = work / "exercises" / "alpha" / "a1.py"
+    original_text = exercise_path.read_text(encoding="utf-8")
+    app = PythonlingsApp(root=work, start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        assert isinstance(track, TrackScreen)
+        editor = track.query_one("#code", TextArea)
+
+        editor.text = "x = 99\n"
+        await pilot.pause(0.7)
+        await _settle(pilot)
+        editor.text = original_text
+        await pilot.pause()
+
+        await pilot.press("f5")
+        await pilot.pause()
+        assert isinstance(app.screen, DocsScreen)
+        await pilot.press("ctrl+q")
+        await pilot.pause()
+
+        assert exercise_path.read_text(encoding="utf-8") == original_text
+        assert app.return_code == 0
+
+
+@pytest.mark.asyncio
+async def test_revert_and_rapid_edits_use_debounced_persistence(
+    tmp_path: Path,
+) -> None:
+    work = _work_copy(tmp_path)
+    exercise_path = work / "exercises" / "alpha" / "a1.py"
+    original_text = exercise_path.read_text(encoding="utf-8")
+    app = PythonlingsApp(root=work, start_topic="alpha")
+    async with app.run_test() as pilot:
+        await _settle(pilot)
+        track = app.screen
+        assert isinstance(track, TrackScreen)
+        editor = track.query_one("#code", TextArea)
+
+        editor.text = "x = 1\n"
+        editor.text = "x = 2\n"
+        await pilot.pause(0.7)
+        await _settle(pilot)
+        assert exercise_path.read_text(encoding="utf-8") == "x = 2\n"
+
+        editor.text = original_text
+        await pilot.pause(0.7)
+        await _settle(pilot)
+        assert exercise_path.read_text(encoding="utf-8") == original_text
+
+
+@pytest.mark.asyncio
+async def test_initial_load_does_not_schedule_a_save(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    flushes: list[object] = []
+    original_flush = TrackScreen._flush_and_run
+
+    def record_flush(screen: TrackScreen) -> None:
+        flushes.append(screen.current)
+        original_flush(screen)
+
+    monkeypatch.setattr(TrackScreen, "_flush_and_run", record_flush)
+    app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
+    async with app.run_test() as pilot:
+        await pilot.pause(0.7)
+        await _settle(pilot)
+
+    assert flushes == []
+
+
+@pytest.mark.asyncio
 async def test_hint_visibility_resets_after_advance(tmp_path: Path) -> None:
     work = _work_copy(tmp_path)
     app = PythonlingsApp(root=work, start_topic="alpha")
@@ -404,7 +576,9 @@ async def test_solving_a_topic_marks_progress(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_picker_refreshes_progress_after_returning(tmp_path: Path) -> None:
+async def test_picker_refreshes_progress_after_returning(
+    tmp_path: Path,
+) -> None:
     work = _work_copy(tmp_path)
     app = PythonlingsApp(root=work, start_topic="beta")
     async with app.run_test() as pilot:
@@ -418,8 +592,7 @@ async def test_picker_refreshes_progress_after_returning(tmp_path: Path) -> None
         await _settle(pilot)
         assert isinstance(app.screen, TopicPickerScreen)
         rendered = " ".join(
-            str(row.content)
-            for row in app.screen.query(".topic-row").results()
+            str(row.content) for row in app.screen.query(".topic-row").results()
         )
         # beta's one exercise is now done -> "1/1" must appear.
         assert "1/1" in rendered

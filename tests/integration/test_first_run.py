@@ -1,12 +1,13 @@
+# tests/integration/test_first_run.py
 from __future__ import annotations
-
-from pathlib import Path
 
 import pythonlings.app as app_module
 from pythonlings.cli import main
 
 
-def test_bare_run_creates_home_workspace_and_launches(tmp_path, monkeypatch, capsys):
+def test_bare_run_creates_home_workspace_and_launches(
+    tmp_path, monkeypatch, capsys
+):
     home = tmp_path / "home"
     monkeypatch.setenv("PYTHONLINGS_HOME", str(home))
     monkeypatch.chdir(tmp_path)  # cwd is not a workspace
@@ -27,14 +28,18 @@ def test_bare_run_creates_home_workspace_and_launches(tmp_path, monkeypatch, cap
     assert "Created your workspace at" in capsys.readouterr().out
 
 
-def test_bare_run_resumes_existing_home_without_notice(tmp_path, monkeypatch, capsys):
+def test_bare_run_resumes_existing_home_without_notice(
+    tmp_path, monkeypatch, capsys
+):
     home = tmp_path / "home"
     monkeypatch.setenv("PYTHONLINGS_HOME", str(home))
     main(["init", "--path", str(home)])
     capsys.readouterr()
     monkeypatch.chdir(tmp_path)
 
-    monkeypatch.setattr(app_module, "run_tui", lambda root, t, force_picker=False: 0)
+    monkeypatch.setattr(
+        app_module, "run_tui", lambda root, t, force_picker=False: 0
+    )
 
     code = main([])
 

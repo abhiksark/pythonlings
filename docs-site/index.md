@@ -7,8 +7,9 @@ hide:
 <div class="pl-hero" markdown>
   <div class="pl-eyebrow">Rustlings for Python</div>
   <div class="pl-title">Learn Python by fixing tiny broken programs.</div>
-  <div class="pl-subtitle">292 exercises across 31 topics. Hidden checks rerun the
-    instant you save — fix the code, watch it go green, advance.</div>
+  <div class="pl-subtitle">292 exercises across 31 topics. In the built-in editor,
+    hidden checks rerun after you stop typing — fix the code, watch it go green,
+    advance.</div>
   <div class="pl-install">$ uvx pythonlings init</div>
   <div class="pl-ctas">
     <a class="pl-btn" href="quick-start/">Get started →</a>

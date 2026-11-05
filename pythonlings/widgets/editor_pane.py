@@ -22,7 +22,15 @@ class EditorPane(Vertical):
     def load_exercise(self, exercise: Exercise) -> None:
         """Replace the editor contents with the exercise file from disk."""
         area = self.query_one("#code", TextArea)
-        area.text = exercise.path.read_text(encoding="utf-8")
+        try:
+            text = exercise.path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            # Preserve unreadable files; the runner reports the read error.
+            area.text = ""
+            area.read_only = True
+        else:
+            area.text = text
+            area.read_only = False
         area.move_cursor((0, 0))
 
     def focus_editor(self) -> None:

@@ -5,8 +5,10 @@ from pathlib import Path
 
 from textual.app import App
 
-from pythonlings.core.manifest import Manifest, load as load_manifest
-from pythonlings.core.state import State, load as load_state, next_pending
+from pythonlings.core.manifest import Manifest
+from pythonlings.core.manifest import load as load_manifest
+from pythonlings.core.state import State, next_pending
+from pythonlings.core.state import load as load_state
 from pythonlings.screens.topic_picker import TopicPickerScreen
 from pythonlings.screens.track import TrackScreen
 
@@ -38,6 +40,14 @@ class PythonlingsApp(App[int]):
             from pythonlings.screens.welcome import WelcomeScreen
 
             self.push_screen(WelcomeScreen())
+
+    def action_quit(self) -> None:
+        """Flush an active exercise before handling the app-level quit key."""
+        for screen in reversed(self.screen_stack):
+            if isinstance(screen, TrackScreen):
+                screen.action_quit()
+                return
+        self.exit(0)
 
     def _startup_target(self) -> tuple[str, str | None] | None:
         if self._start_topic is not None:

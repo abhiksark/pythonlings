@@ -1,3 +1,4 @@
+# tests/integration/test_solution_verify.py
 from pathlib import Path
 
 from pythonlings.core.manifest import load
@@ -13,6 +14,8 @@ def test_every_reference_solution_passes() -> None:
     for exercise in manifest.exercises:
         result = run_verify(solution_exercise(root, exercise))
         if not result.passed:
-            failures.append(f"{exercise.name}: {result.stderr or result.stdout}")
+            failures.append(
+                f"{exercise.name}: {result.stderr or result.stdout}"
+            )
 
     assert failures == []

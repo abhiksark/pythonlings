@@ -1,2 +1,3 @@
-assert city == "London"
+# checks/json/json3.py
+assert city == "London", f"city should be 'London', got {city!r}"
 print("json3 ok")

@@ -9,8 +9,8 @@ Pythonlings follows a tight edit-check-advance loop. Here is what happens at eac
 ## The Learner Loop
 
 1. **Open the next pending exercise** — the TUI shows the first incomplete exercise in the curriculum.
-2. **Edit the broken code** — fix the intentional mistake directly in the built-in editor (or any external editor you prefer).
-3. **Checks rerun automatically** — roughly 0.6 s after you stop typing, Pythonlings re-evaluates the exercise in a fresh subprocess. There is no filesystem watcher; the debounce fires inside the TUI editor.
+2. **Edit the broken code** — fix the intentional mistake directly in the built-in editor. This is the automatic edit-check-advance workflow. If you use an external editor, save the file and run `pythonlings run <name>` to check it manually.
+3. **Checks rerun automatically** — roughly 0.6 s after you stop typing in the built-in editor, Pythonlings re-evaluates the exercise in a fresh subprocess. There is no filesystem watcher, so external saves do not trigger this automatic check.
 4. **Remove the `# I AM NOT DONE` marker** — the marker is your explicit "I'm finished" signal. Passing checks alone does not advance the exercise (see below).
 5. **Advance** — once checks are green *and* the marker is gone, the exercise is marked complete and the TUI moves to the next one.
 

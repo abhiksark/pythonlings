@@ -8,8 +8,7 @@ import sys
 import tempfile
 import time
 
-from pythonlings.core.exercise import Exercise
-from pythonlings.core.exercise import RunResult
+from pythonlings.core.exercise import Exercise, RunResult
 
 DEFAULT_TIMEOUT_S = 5.0
 
@@ -27,7 +26,21 @@ def run(exercise: Exercise, timeout_s: float = DEFAULT_TIMEOUT_S) -> RunResult:
         "PYTHONDONTWRITEBYTECODE": "1",
         "PYTHONIOENCODING": "utf-8",
     }
-    exercise_src = exercise_path.read_text(encoding="utf-8")
+    try:
+        exercise_src = exercise_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as error:
+        return RunResult(
+            passed=False,
+            exit_code=-1,
+            stdout="",
+            stderr=(
+                f"pythonlings: could not read exercise {exercise.name!r} "
+                f"at {exercise_path} as UTF-8: {error}\n"
+                "Check that the file is readable and saved as UTF-8.\n"
+            ),
+            duration_s=time.monotonic() - start,
+            timed_out=False,
+        )
     runner_src = (
         "import sys\n"
         "from pathlib import Path\n"
@@ -107,8 +120,8 @@ def run(exercise: Exercise, timeout_s: float = DEFAULT_TIMEOUT_S) -> RunResult:
 def run_verify(
     exercise: Exercise, timeout_s: float = DEFAULT_TIMEOUT_S
 ) -> RunResult:
-    """Run an exercise but treat the marker as a no-op (CI / curriculum-author mode)."""
+    """Run an exercise ignoring its marker (CI / curriculum-author mode)."""
     result = run(exercise, timeout_s=timeout_s)
-    # `verify` cares only about exit code; recompute passed without the marker check.
+    # `verify` cares only about exit code, ignoring the marker check.
     result.passed = result.exit_code == 0 and not result.timed_out
     return result

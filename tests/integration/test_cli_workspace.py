@@ -1,9 +1,11 @@
 # tests/integration/test_cli_workspace.py
+import shutil
 from pathlib import Path
 
-from pythonlings.core import curriculum
-from pythonlings.cli import main
+import pytest
 
+from pythonlings.cli import main
+from pythonlings.core import curriculum
 
 _STALE_CHECK = "# stale check used to identify the updated workspace\n"
 
@@ -40,7 +42,9 @@ def test_init_command_creates_workspace(tmp_path: Path) -> None:
     ]
 
 
-def test_init_rejects_non_empty_non_workspace_dir(tmp_path: Path, capsys) -> None:
+def test_init_rejects_non_empty_non_workspace_dir(
+    tmp_path: Path, capsys
+) -> None:
     target = tmp_path / "stuff"
     target.mkdir()
     (target / "notes.txt").write_text("keep", encoding="utf-8")
@@ -52,7 +56,9 @@ def test_init_rejects_non_empty_non_workspace_dir(tmp_path: Path, capsys) -> Non
     assert "isn't empty and isn't a pythonlings workspace" in err
 
 
-def test_init_on_existing_workspace_is_friendly_noop(tmp_path: Path, capsys) -> None:
+def test_init_on_existing_workspace_is_friendly_noop(
+    tmp_path: Path, capsys
+) -> None:
     target = tmp_path / "ws"
     assert main(["init", "--path", str(target)]) == 0
     capsys.readouterr()  # discard first output
@@ -82,6 +88,64 @@ def test_init_force_overwrites_existing_workspace(tmp_path: Path) -> None:
     )
 
 
+@pytest.mark.parametrize("legacy_state", [False, True])
+def test_force_init_rejects_curriculum_source_without_mutation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys, legacy_state: bool
+) -> None:
+    source = tmp_path / "source"
+    fixture = Path(__file__).parents[1] / "fixtures" / "passing_curriculum"
+    shutil.copytree(
+        fixture, source, ignore=shutil.ignore_patterns(".pythonlings")
+    )
+    if legacy_state:
+        (source / ".pylings").mkdir()
+        (source / ".pylings" / "state.json").write_text(
+            '{"format_version": 2, "completed": ["passing1"]}',
+            encoding="utf-8",
+        )
+    before = {
+        path.relative_to(source): path.read_bytes()
+        for path in source.rglob("*")
+        if path.is_file()
+    }
+    monkeypatch.setattr(curriculum, "source_root", lambda: source)
+
+    code = main(["init", "--path", str(source / "exercises" / ".."), "--force"])
+
+    assert code == 1
+    error = capsys.readouterr().err
+    assert error.startswith("pythonlings:")
+    assert "curriculum source" in error
+    assert "Traceback" not in error
+    after = {
+        path.relative_to(source): path.read_bytes()
+        for path in source.rglob("*")
+        if path.is_file()
+    }
+    assert before == after
+    assert not (source / ".pythonlings").exists()
+
+
+@pytest.mark.parametrize("force", [False, True])
+def test_init_preserves_legacy_progress(tmp_path: Path, force: bool) -> None:
+    root = tmp_path / "workspace"
+    fixture = Path(__file__).parents[1] / "fixtures" / "passing_curriculum"
+    shutil.copytree(
+        fixture, root, ignore=shutil.ignore_patterns(".pythonlings")
+    )
+    (root / ".pylings").mkdir()
+    progress = b'{"format_version": 2, "completed": ["passing1"]}'
+    (root / ".pylings" / "state.json").write_bytes(progress)
+    args = ["init", "--path", str(root)]
+    if force:
+        args.append("--force")
+
+    assert main(args) == 0
+
+    assert not (root / ".pylings").exists()
+    assert (root / ".pythonlings" / "state.json").read_bytes() == progress
+
+
 def test_update_via_path_migrates_legacy_state_dir(tmp_path: Path) -> None:
     target = tmp_path / "legacy-ws"
     main(["init", "--path", str(target)])
@@ -92,7 +156,7 @@ def test_update_via_path_migrates_legacy_state_dir(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    # --path points at the workspace; cwd is elsewhere. The legacy dir must move.
+    # --path points at the workspace, not cwd; the legacy dir must move.
     main(["update", "--path", str(target)])
 
     assert not (target / ".pylings").exists()
@@ -151,7 +215,9 @@ def test_update_path_takes_precedence_over_root_and_cwd(
     _assert_not_updated(cwd_check)
 
 
-def test_update_root_takes_precedence_over_cwd(tmp_path: Path, monkeypatch) -> None:
+def test_update_root_takes_precedence_over_cwd(
+    tmp_path: Path, monkeypatch
+) -> None:
     cwd = tmp_path / "cwd-ws"
     root = tmp_path / "root-ws"
     cwd_check = _stale_workspace(cwd)
@@ -165,7 +231,9 @@ def test_update_root_takes_precedence_over_cwd(tmp_path: Path, monkeypatch) -> N
     _assert_not_updated(cwd_check)
 
 
-def test_bare_update_prefers_current_workspace(tmp_path: Path, monkeypatch) -> None:
+def test_bare_update_prefers_current_workspace(
+    tmp_path: Path, monkeypatch
+) -> None:
     home = tmp_path / "home-ws"
     monkeypatch.setenv("PYTHONLINGS_HOME", str(home))
     home_check = _stale_workspace(home)

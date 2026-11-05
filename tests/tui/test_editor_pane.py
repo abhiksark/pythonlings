@@ -36,6 +36,27 @@ async def test_load_exercise_fills_editor(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
+async def test_editor_recovers_after_unreadable_exercise(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "ex.py"
+    path.write_bytes(b"\xff")
+    exercise = Exercise("ex", path, tmp_path / "check.py", "t", "")
+    app = _Harness()
+
+    async with app.run_test():
+        pane = app.query_one(EditorPane)
+        pane.load_exercise(exercise)
+        assert pane.query_one("#code", TextArea).read_only
+        path.write_text("x = 1\n", encoding="utf-8")
+
+        pane.load_exercise(exercise)
+
+        assert not pane.query_one("#code", TextArea).read_only
+        assert pane.text == "x = 1\n"
+
+
+@pytest.mark.asyncio
 async def test_text_property_reflects_buffer(tmp_path: Path) -> None:
     app = _Harness()
     async with app.run_test() as pilot:

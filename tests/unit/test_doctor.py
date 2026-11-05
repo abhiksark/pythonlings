@@ -1,3 +1,4 @@
+# tests/unit/test_doctor.py
 from __future__ import annotations
 
 from pathlib import Path
@@ -30,11 +31,7 @@ def _make_workspace(root: Path) -> Path:
         "answer = 42\n", encoding="utf-8"
     )
     (
-        root
-        / ".pythonlings"
-        / "originals"
-        / "variables"
-        / "variables1.py"
+        root / ".pythonlings" / "originals" / "variables" / "variables1.py"
     ).write_text(exercise, encoding="utf-8")
     return root
 
@@ -93,11 +90,7 @@ def test_missing_solution_is_a_warning(tmp_path: Path) -> None:
 def test_missing_snapshot_is_an_actionable_warning(tmp_path: Path) -> None:
     root = _make_workspace(tmp_path)
     (
-        root
-        / ".pythonlings"
-        / "originals"
-        / "variables"
-        / "variables1.py"
+        root / ".pythonlings" / "originals" / "variables" / "variables1.py"
     ).unlink()
 
     report = run_diagnostics(root, package_version="0.4.1")

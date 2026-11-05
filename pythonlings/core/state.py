@@ -45,7 +45,8 @@ def load(root: Path) -> State:
         data = json.loads(path.read_text(encoding="utf-8"))
         if data.get("format_version") != FORMAT_VERSION:
             raise ValueError(
-                f"unsupported state format_version: {data.get('format_version')}"
+                "unsupported state format_version: "
+                f"{data.get('format_version')}"
             )
         return State(
             completed=set(data.get("completed", [])),

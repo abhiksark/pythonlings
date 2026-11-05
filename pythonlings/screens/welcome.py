@@ -13,10 +13,12 @@ from pythonlings.core.state import save as save_state
 def welcome_text() -> str:
     """The first-launch explainer for the edit/save/advance loop."""
     return (
-        "You learn Python here by fixing small broken programs. The loop is:\n\n"
+        "You learn Python here by fixing small broken programs. "
+        "The loop is:\n\n"
         "  1. Edit the current exercise in the built-in editor.\n"
         "  2. Checks rerun automatically as you type.\n"
-        "  3. Remove the `# I AM NOT DONE` marker to advance to the next one.\n\n"
+        "  3. Remove the `# I AM NOT DONE` marker "
+        "to advance to the next one.\n\n"
         "Handy keys: F1 hint - F3 exercise list - F4 topics - "
         "F5 local docs - Ctrl+Q quit.\n\n"
         "Press Enter to start."

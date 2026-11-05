@@ -21,11 +21,16 @@ def _snapshot_path(root: Path, exercise: Exercise) -> Path:
 def _original_path(root: Path, exercise: Exercise) -> Path:
     if exercise.rel_path is None:
         return _snapshot_path(root, exercise)
-    return root / ".pythonlings" / "originals" / exercise.rel_path.relative_to("exercises")
+    return (
+        root
+        / ".pythonlings"
+        / "originals"
+        / exercise.rel_path.relative_to("exercises")
+    )
 
 
 def snapshot(root: Path, exercise: Exercise) -> None:
-    """Copy the pristine source into .pythonlings/originals/ if not already snapshotted."""
+    """Snapshot pristine source in .pythonlings/originals/ if absent."""
     snap = _original_path(root, exercise)
     if snap.exists():
         return
@@ -38,6 +43,7 @@ def restore(root: Path, exercise: Exercise) -> None:
     snap = _original_path(root, exercise)
     if not snap.exists():
         raise ResetError(
-            f"no snapshot for {exercise.name!r}. Run 'pythonlings update' first."
+            f"no snapshot for {exercise.name!r}. "
+            "Run 'pythonlings update' first."
         )
     shutil.copy2(snap, exercise.path)

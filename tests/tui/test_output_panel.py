@@ -1,3 +1,4 @@
+# tests/tui/test_output_panel.py
 from pathlib import Path
 
 import pytest
@@ -57,7 +58,9 @@ async def test_render_running_state(tmp_path: Path) -> None:
             _exercise(tmp_path, "# Goal: set name\nname = broken\n"), 0, 2
         )
         await pilot.pause()
-        assert "Running checks" in str(panel.query_one("#status", Static).content)
+        assert "Running checks" in str(
+            panel.query_one("#status", Static).content
+        )
 
 
 @pytest.mark.asyncio
@@ -100,7 +103,9 @@ async def test_result_shows_docs_link(tmp_path: Path) -> None:
         await pilot.pause()
         rendered = panel.renderable_text()
         assert "Docs" in rendered
-        assert "https://docs.python.org/3/tutorial/introduction.html" in rendered
+        assert (
+            "https://docs.python.org/3/tutorial/introduction.html" in rendered
+        )
 
 
 @pytest.mark.asyncio
@@ -125,16 +130,22 @@ async def test_full_hint_toggles_on_f1(tmp_path: Path) -> None:
         panel = app.query_one(OutputPanel)
         panel.toggle_hint("Full hint text.")
         await pilot.pause()
-        assert "Full hint text." in str(panel.query_one("#hint", Static).content)
+        assert "Full hint text." in str(
+            panel.query_one("#hint", Static).content
+        )
 
 
 @pytest.mark.asyncio
-async def test_show_topic_complete_uses_topic_header_not_global(tmp_path: Path) -> None:
+async def test_show_topic_complete_uses_topic_header_not_global(
+    tmp_path: Path,
+) -> None:
     app = _Harness()
     async with app.run_test() as pilot:
         await pilot.pause()
         panel = app.query_one(OutputPanel)
-        panel.show_topic_complete("Topic 'variables' complete — press F4 for topics.")
+        panel.show_topic_complete(
+            "Topic 'variables' complete — press F4 for topics."
+        )
         await pilot.pause()
         header = str(panel.query_one("#output-header", Static).content)
         assert "Topic complete" in header

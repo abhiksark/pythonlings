@@ -1,3 +1,4 @@
+# pythonlings/core/workspace.py
 from __future__ import annotations
 
 import os
@@ -42,7 +43,9 @@ def resolve_workspace_root(
     `create_if_missing`) a freshly created home workspace.
     """
     if explicit_root is not None:
-        return ResolvedWorkspace(explicit_root.expanduser().resolve(), created=False)
+        return ResolvedWorkspace(
+            explicit_root.expanduser().resolve(), created=False
+        )
 
     cwd = cwd.resolve()
     if is_workspace(cwd):

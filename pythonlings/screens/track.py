@@ -11,7 +11,8 @@ from textual.widgets import Footer, Header, TextArea
 
 from pythonlings.core.exercise import Exercise, RunResult
 from pythonlings.core.runner import run as run_exercise
-from pythonlings.core.state import completed_count, next_pending, save as save_state
+from pythonlings.core.state import completed_count, next_pending
+from pythonlings.core.state import save as save_state
 from pythonlings.widgets.editor_pane import EditorPane
 from pythonlings.widgets.exercise_tree import ExerciseTree
 from pythonlings.widgets.output_panel import OutputPanel
@@ -52,8 +53,10 @@ def celebration_message(total: int) -> str:
     return (
         f"🎉  You finished all {total} pythonlings exercises! 🎉\n\n"
         "That's the whole curriculum — nicely done.\n"
-        f"Share it: \"I just completed all {total} pythonlings Python exercises 🎉\"\n"
-        "If pythonlings helped, a ⭐ on GitHub or a contribution is hugely appreciated.\n\n"
+        f'Share it: "I just completed all {total} '
+        'pythonlings Python exercises 🎉"\n'
+        "If pythonlings helped, a ⭐ on GitHub "
+        "or a contribution is hugely appreciated.\n\n"
         "Press Ctrl+Q to quit, or F4 to revisit topics."
     )
 
@@ -68,7 +71,7 @@ class TrackScreen(Screen[None]):
         Binding("f4", "topics", "Topics"),
         Binding("f5", "docs", "Docs"),
         Binding("escape", "quit", "Quit", priority=True),
-        Binding("ctrl+q", "quit", "Quit"),
+        Binding("ctrl+q", "quit", "Quit", priority=True),
     ]
 
     def __init__(self, topic: str, start_exercise: str | None = None) -> None:
@@ -76,7 +79,7 @@ class TrackScreen(Screen[None]):
         self.topic = topic
         self._start_exercise = start_exercise
         self._save_timer: Timer | None = None
-        self._loaded_text = ""
+        self._persisted_text = ""
         self._failure_counts: dict[str, int] = {}
         self.current: str | None = None
 
@@ -152,7 +155,7 @@ class TrackScreen(Screen[None]):
         self.query_one(OutputPanel).reset_hint()
         pane = self.query_one(EditorPane)
         pane.load_exercise(self._exercise(self.current))
-        self._loaded_text = pane.text
+        self._persisted_text = pane.text
         self._failure_counts[self.current] = 0
         self._record_resume(self.current)
 
@@ -165,18 +168,22 @@ class TrackScreen(Screen[None]):
     def on_text_area_changed(self, event: TextArea.Changed) -> None:
         if event.text_area is not self.query_one("#code", TextArea):
             return
-        if self.query_one(EditorPane).text == self._loaded_text:
+        if self.query_one(EditorPane).text == self._persisted_text:
             return
         if self._save_timer is not None:
             self._save_timer.stop()
-        self._save_timer = self.set_timer(_DEBOUNCE_SECONDS, self._flush_and_run)
+        self._save_timer = self.set_timer(
+            _DEBOUNCE_SECONDS, self._flush_and_run
+        )
 
     def _flush_and_run(self) -> None:
         self._save_timer = None
         if self.current is None:
             return
         ex = self._exercise(self.current)
-        ex.path.write_text(self.query_one(EditorPane).text, encoding="utf-8")
+        text = self.query_one(EditorPane).text
+        ex.path.write_text(text, encoding="utf-8")
+        self._persisted_text = text
         self._run_current()
 
     def _run_current(self) -> None:
@@ -238,7 +245,9 @@ class TrackScreen(Screen[None]):
     def action_toggle_hint(self) -> None:
         if self.current is None:
             return
-        self.query_one(OutputPanel).toggle_hint(self._exercise(self.current).hint)
+        self.query_one(OutputPanel).toggle_hint(
+            self._exercise(self.current).hint
+        )
 
     def action_reset(self) -> None:
         from pythonlings.core.reset import restore
@@ -280,6 +289,8 @@ class TrackScreen(Screen[None]):
             self._save_timer.stop()
             self._save_timer = None
             if self.current is not None:
+                text = self.query_one(EditorPane).text
                 self._exercise(self.current).path.write_text(
-                    self.query_one(EditorPane).text, encoding="utf-8"
+                    text, encoding="utf-8"
                 )
+                self._persisted_text = text

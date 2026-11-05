@@ -32,7 +32,9 @@ def test_save_then_load_ux_fields(tmp_path: Path) -> None:
     assert loaded.last_exercise == "a2"
 
 
-def test_missing_ux_fields_default_for_existing_v2_state(tmp_path: Path) -> None:
+def test_missing_ux_fields_default_for_existing_v2_state(
+    tmp_path: Path,
+) -> None:
     import json
 
     pdir = tmp_path / ".pythonlings"
@@ -50,6 +52,7 @@ def test_missing_ux_fields_default_for_existing_v2_state(tmp_path: Path) -> None
 
 def test_state_file_is_format_version_2(tmp_path: Path) -> None:
     import json
+
     save(tmp_path, State(completed={"a"}))
     data = json.loads((tmp_path / ".pythonlings" / "state.json").read_text())
     assert data["format_version"] == 2
@@ -58,6 +61,7 @@ def test_state_file_is_format_version_2(tmp_path: Path) -> None:
 
 def test_old_v1_state_is_discarded(tmp_path: Path) -> None:
     import json
+
     pdir = tmp_path / ".pythonlings"
     pdir.mkdir()
     (pdir / "state.json").write_text(

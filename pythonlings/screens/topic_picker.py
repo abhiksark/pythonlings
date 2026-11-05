@@ -81,7 +81,9 @@ class TopicPickerScreen(Screen[None]):
             if done < total:
                 return topic
         return self._first_incomplete_topic() or (
-            self.app.manifest.topics()[0] if self.app.manifest.topics() else None
+            self.app.manifest.topics()[0]
+            if self.app.manifest.topics()
+            else None
         )
 
     def _banner_text(self) -> str:

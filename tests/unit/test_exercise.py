@@ -10,7 +10,11 @@ from pythonlings.core.exercise import Exercise
 
 def _ex(path: Path) -> Exercise:
     return Exercise(
-        name="ex", path=path, check_path=path.parent / "check.py", topic="t", hint=""
+        name="ex",
+        path=path,
+        check_path=path.parent / "check.py",
+        topic="t",
+        hint="",
     )
 
 
