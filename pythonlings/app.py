@@ -5,8 +5,10 @@ from pathlib import Path
 
 from textual.app import App
 
-from pythonlings.core.manifest import Manifest, load as load_manifest
-from pythonlings.core.state import State, load as load_state, next_pending
+from pythonlings.core.manifest import Manifest
+from pythonlings.core.manifest import load as load_manifest
+from pythonlings.core.state import State, next_pending
+from pythonlings.core.state import load as load_state
 from pythonlings.screens.topic_picker import TopicPickerScreen
 from pythonlings.screens.track import TrackScreen
 

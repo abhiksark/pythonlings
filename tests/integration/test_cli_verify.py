@@ -47,8 +47,8 @@ def test_verify_fails_on_first_failure() -> None:
 def test_verify_against_only_passing_fixture(tmp_path: Path) -> None:
     info = tmp_path / "info.toml"
     info.write_text(
-        'format_version = 1\n'
-        '[[exercises]]\n'
+        "format_version = 1\n"
+        "[[exercises]]\n"
         'name = "ok"\n'
         'path = "exercises/ok.py"\n'
         'hint = "h"\n',
@@ -57,7 +57,9 @@ def test_verify_against_only_passing_fixture(tmp_path: Path) -> None:
     (tmp_path / "exercises").mkdir()
     (tmp_path / "exercises" / "ok.py").write_text("x = 1\n", encoding="utf-8")
     (tmp_path / "checks").mkdir()
-    (tmp_path / "checks" / "ok.py").write_text("assert x == 1\n", encoding="utf-8")
+    (tmp_path / "checks" / "ok.py").write_text(
+        "assert x == 1\n", encoding="utf-8"
+    )
 
     result = _run("--root", str(tmp_path), "verify")
     assert result.returncode == 0, result.stderr
@@ -68,7 +70,7 @@ def test_verify_ignores_marker(tmp_path: Path) -> None:
     # should be treated as a verify-pass.
     info = tmp_path / "info.toml"
     info.write_text(
-        'format_version = 1\n'
+        "format_version = 1\n"
         '[[exercises]]\nname = "ok"\npath = "exercises/ok.py"\nhint = "h"\n',
         encoding="utf-8",
     )
@@ -77,7 +79,9 @@ def test_verify_ignores_marker(tmp_path: Path) -> None:
         "# I AM NOT DONE\nx = 1\n", encoding="utf-8"
     )
     (tmp_path / "checks").mkdir()
-    (tmp_path / "checks" / "ok.py").write_text("assert x == 1\n", encoding="utf-8")
+    (tmp_path / "checks" / "ok.py").write_text(
+        "assert x == 1\n", encoding="utf-8"
+    )
 
     result = _run("--root", str(tmp_path), "verify")
     assert result.returncode == 0
@@ -89,8 +93,12 @@ def test_verify_reports_manifest_error_with_exit_2(tmp_path: Path) -> None:
     assert "info.toml" in result.stderr
 
 
-def test_verify_malformed_toml_exits_2_without_traceback(tmp_path: Path) -> None:
-    (tmp_path / "info.toml").write_text("format_version = [1\n", encoding="utf-8")
+def test_verify_malformed_toml_exits_2_without_traceback(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "info.toml").write_text(
+        "format_version = [1\n", encoding="utf-8"
+    )
     result = _run("--root", str(tmp_path), "verify")
     assert result.returncode == 2
     assert "info.toml" in result.stderr
@@ -106,7 +114,9 @@ def test_verify_invalid_utf8_exits_2_without_traceback(tmp_path: Path) -> None:
     assert "Traceback" not in result.stderr
 
 
-def test_verify_info_toml_read_error_exits_2_without_traceback(tmp_path: Path) -> None:
+def test_verify_info_toml_read_error_exits_2_without_traceback(
+    tmp_path: Path,
+) -> None:
     (tmp_path / "info.toml").mkdir()
     result = _run("--root", str(tmp_path), "verify")
     assert result.returncode == 2
@@ -114,10 +124,12 @@ def test_verify_info_toml_read_error_exits_2_without_traceback(tmp_path: Path) -
     assert "Traceback" not in result.stderr
 
 
-def test_verify_traversal_path_exits_2_without_traceback(tmp_path: Path) -> None:
+def test_verify_traversal_path_exits_2_without_traceback(
+    tmp_path: Path,
+) -> None:
     (tmp_path / "info.toml").write_text(
-        'format_version = 1\n'
-        '[[exercises]]\n'
+        "format_version = 1\n"
+        "[[exercises]]\n"
         'name = "a"\n'
         'path = "exercises/../../etc/passwd"\n'
         'hint = "h"\n',
@@ -129,12 +141,14 @@ def test_verify_traversal_path_exits_2_without_traceback(tmp_path: Path) -> None
     assert result.stderr.startswith("pythonlings:")
 
 
-def test_verify_directory_path_exits_2_without_traceback(tmp_path: Path) -> None:
+def test_verify_directory_path_exits_2_without_traceback(
+    tmp_path: Path,
+) -> None:
     (tmp_path / "exercises" / "topic").mkdir(parents=True)
     (tmp_path / "checks" / "topic").mkdir(parents=True)
     (tmp_path / "info.toml").write_text(
-        'format_version = 1\n'
-        '[[exercises]]\n'
+        "format_version = 1\n"
+        "[[exercises]]\n"
         'name = "a"\n'
         'path = "exercises/topic"\n',
         encoding="utf-8",
@@ -146,17 +160,19 @@ def test_verify_directory_path_exits_2_without_traceback(tmp_path: Path) -> None
     assert "Traceback" not in result.stderr
 
 
-def test_hint_non_string_field_exits_2_without_traceback(tmp_path: Path) -> None:
+def test_hint_non_string_field_exits_2_without_traceback(
+    tmp_path: Path,
+) -> None:
     (tmp_path / "exercises").mkdir()
     (tmp_path / "exercises" / "a.py").write_text("", encoding="utf-8")
     (tmp_path / "checks").mkdir()
     (tmp_path / "checks" / "a.py").write_text("", encoding="utf-8")
     (tmp_path / "info.toml").write_text(
-        'format_version = 1\n'
-        '[[exercises]]\n'
+        "format_version = 1\n"
+        "[[exercises]]\n"
         'name = "a"\n'
         'path = "exercises/a.py"\n'
-        'hint = 1\n',
+        "hint = 1\n",
         encoding="utf-8",
     )
 
@@ -172,14 +188,16 @@ def test_verify_completes_under_ascii_encoding(tmp_path: Path) -> None:
     # strict-ASCII console.
     info = tmp_path / "info.toml"
     info.write_text(
-        'format_version = 1\n'
-        '[[exercises]]\n'
+        "format_version = 1\n"
+        "[[exercises]]\n"
         'name = "ok"\n'
         'path = "exercises/ok.py"\n',
         encoding="utf-8",
     )
     (tmp_path / "exercises").mkdir()
-    (tmp_path / "exercises" / "ok.py").write_text("value = 1\n", encoding="utf-8")
+    (tmp_path / "exercises" / "ok.py").write_text(
+        "value = 1\n", encoding="utf-8"
+    )
     (tmp_path / "checks").mkdir()
     (tmp_path / "checks" / "ok.py").write_text(
         'assert value == 1, "value should be 1"\nprint("ok \u2713")\n',
@@ -198,20 +216,31 @@ def test_verify_completes_under_ascii_encoding(tmp_path: Path) -> None:
 def test_verify_keeps_unicode_symbol_under_utf8(tmp_path: Path) -> None:
     info = tmp_path / "info.toml"
     info.write_text(
-        'format_version = 1\n'
-        '[[exercises]]\n'
+        "format_version = 1\n"
+        "[[exercises]]\n"
         'name = "ok"\n'
         'path = "exercises/ok.py"\n',
         encoding="utf-8",
     )
     (tmp_path / "exercises").mkdir()
-    (tmp_path / "exercises" / "ok.py").write_text("value = 1\n", encoding="utf-8")
+    (tmp_path / "exercises" / "ok.py").write_text(
+        "value = 1\n", encoding="utf-8"
+    )
     (tmp_path / "checks").mkdir()
-    (tmp_path / "checks" / "ok.py").write_text("assert value == 1\n", encoding="utf-8")
+    (tmp_path / "checks" / "ok.py").write_text(
+        "assert value == 1\n", encoding="utf-8"
+    )
 
     env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
     result = subprocess.run(
-        [sys.executable, "-m", "pythonlings", "--root", str(tmp_path), "verify"],
+        [
+            sys.executable,
+            "-m",
+            "pythonlings",
+            "--root",
+            str(tmp_path),
+            "verify",
+        ],
         capture_output=True,
         text=True,
         # The child writes UTF-8 because of PYTHONIOENCODING above; decode it

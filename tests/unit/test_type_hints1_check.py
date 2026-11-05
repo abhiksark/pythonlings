@@ -57,7 +57,9 @@ def test_none_annotation_hook_fails_with_clear_message(tmp_path: Path) -> None:
 
 
 def test_callable_annotation_hook_passes(tmp_path: Path) -> None:
-    exercise_src = "def __annotate__(format_value):\n    return {'count': int}\n"
+    exercise_src = (
+        "def __annotate__(format_value):\n    return {'count': int}\n"
+    )
     result = _run_case(tmp_path, exercise_src)
     assert result.passed is True
     assert "type_hints1 ✓" in result.stdout

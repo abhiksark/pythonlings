@@ -1,3 +1,4 @@
+# tests/integration/test_cli_solution.py
 from pathlib import Path
 
 from pythonlings.cli import main
@@ -22,7 +23,9 @@ docs = "https://docs.python.org/3/"
     )
     (root / "exercises" / "passing1.py").write_text("x = 0\n", encoding="utf-8")
     (root / "solutions" / "passing1.py").write_text("x = 1\n", encoding="utf-8")
-    (root / "checks" / "passing1.py").write_text("assert x == 1\n", encoding="utf-8")
+    (root / "checks" / "passing1.py").write_text(
+        "assert x == 1\n", encoding="utf-8"
+    )
 
     code = main(["--root", str(root), "solution", "passing1"])
 
@@ -46,9 +49,13 @@ docs = "https://docs.python.org/3/"
         encoding="utf-8",
     )
     (root / "exercises" / "passing1.py").write_text("x = 1\n", encoding="utf-8")
-    (root / "checks" / "passing1.py").write_text("assert x == 1\n", encoding="utf-8")
+    (root / "checks" / "passing1.py").write_text(
+        "assert x == 1\n", encoding="utf-8"
+    )
 
     code = main(["--debug", "--root", str(root), "run", "passing1"])
 
     assert code == 0
-    assert "run" in (root / ".pythonlings_debug.log").read_text(encoding="utf-8")
+    assert "run" in (root / ".pythonlings_debug.log").read_text(
+        encoding="utf-8"
+    )

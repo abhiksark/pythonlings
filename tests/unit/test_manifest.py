@@ -21,7 +21,9 @@ def _write_curriculum(
         encoding="utf-8",
     )
     (root / "exercises").mkdir(exist_ok=True)
-    (root / "exercises" / f"{name}.py").write_text(exercise_src, encoding="utf-8")
+    (root / "exercises" / f"{name}.py").write_text(
+        exercise_src, encoding="utf-8"
+    )
     (root / "checks").mkdir(exist_ok=True)
     (root / "checks" / f"{name}.py").write_text(check_src, encoding="utf-8")
 
@@ -75,13 +77,17 @@ def test_load_rejects_missing_info_toml(tmp_path: Path) -> None:
 
 
 def test_load_rejects_wrong_format_version(tmp_path: Path) -> None:
-    (tmp_path / "info.toml").write_text("format_version = 2\n", encoding="utf-8")
+    (tmp_path / "info.toml").write_text(
+        "format_version = 2\n", encoding="utf-8"
+    )
     with pytest.raises(ManifestError, match="format_version"):
         load(tmp_path)
 
 
 def test_load_rejects_empty_exercises_list(tmp_path: Path) -> None:
-    (tmp_path / "info.toml").write_text("format_version = 1\n", encoding="utf-8")
+    (tmp_path / "info.toml").write_text(
+        "format_version = 1\n", encoding="utf-8"
+    )
     with pytest.raises(ManifestError, match="non-empty"):
         load(tmp_path)
 
@@ -193,7 +199,9 @@ def test_real_curriculum_has_roadmap_topic_counts() -> None:
 def test_real_curriculum_exercises_have_official_docs_links() -> None:
     repo = Path(__file__).parents[2]
     manifest = load(repo)
-    missing = [exercise.name for exercise in manifest.exercises if not exercise.docs]
+    missing = [
+        exercise.name for exercise in manifest.exercises if not exercise.docs
+    ]
     assert missing == []
     assert all(
         exercise.docs.startswith("https://docs.python.org/3/")
@@ -214,7 +222,9 @@ def test_real_curriculum_check_files_parse() -> None:
 
 
 def test_load_rejects_invalid_toml_syntax(tmp_path: Path) -> None:
-    (tmp_path / "info.toml").write_text("format_version = [1\n", encoding="utf-8")
+    (tmp_path / "info.toml").write_text(
+        "format_version = [1\n", encoding="utf-8"
+    )
     with pytest.raises(ManifestError, match=r"info\.toml"):
         load(tmp_path)
 
@@ -258,10 +268,7 @@ def test_load_rejects_wrong_type_name_field(tmp_path: Path) -> None:
 
 def test_load_rejects_missing_path_field(tmp_path: Path) -> None:
     (tmp_path / "info.toml").write_text(
-        "format_version = 1\n"
-        "[[exercises]]\n"
-        'name = "a"\n'
-        'hint = "h"\n',
+        'format_version = 1\n[[exercises]]\nname = "a"\nhint = "h"\n',
         encoding="utf-8",
     )
     with pytest.raises(ManifestError, match="'path'"):
@@ -306,7 +313,9 @@ def test_load_rejects_symlink_escape(tmp_path: Path) -> None:
     (outside / "secret.py").write_text("SECRET = 1\n", encoding="utf-8")
 
     (tmp_path / "exercises").mkdir()
-    (tmp_path / "exercises" / "link").symlink_to(outside, target_is_directory=True)
+    (tmp_path / "exercises" / "link").symlink_to(
+        outside, target_is_directory=True
+    )
     (tmp_path / "checks").mkdir()
 
     (tmp_path / "info.toml").write_text(
@@ -329,7 +338,9 @@ def test_load_rejects_check_symlink_escape(tmp_path: Path) -> None:
     (tmp_path / "exercises" / "topic").mkdir(parents=True)
     (tmp_path / "exercises" / "topic" / "a.py").write_text("", encoding="utf-8")
     (tmp_path / "checks").mkdir()
-    (tmp_path / "checks" / "topic").symlink_to(outside, target_is_directory=True)
+    (tmp_path / "checks" / "topic").symlink_to(
+        outside, target_is_directory=True
+    )
     (tmp_path / "info.toml").write_text(
         "format_version = 1\n"
         "[[exercises]]\n"
@@ -339,11 +350,15 @@ def test_load_rejects_check_symlink_escape(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    with pytest.raises(ManifestError, match=r"check path.*escapes the workspace"):
+    with pytest.raises(
+        ManifestError, match=r"check path.*escapes the workspace"
+    ):
         load(tmp_path)
 
 
-def test_load_rejects_top_level_exercises_symlink_escape(tmp_path: Path) -> None:
+def test_load_rejects_top_level_exercises_symlink_escape(
+    tmp_path: Path,
+) -> None:
     workspace = tmp_path / "workspace"
     outside = tmp_path / "outside_exercises"
     workspace.mkdir()
@@ -435,7 +450,9 @@ def test_load_wraps_symlink_resolution_errors(
 
 
 @pytest.mark.parametrize("field", ["hint", "docs"])
-def test_load_rejects_non_string_exercise_text(tmp_path: Path, field: str) -> None:
+def test_load_rejects_non_string_exercise_text(
+    tmp_path: Path, field: str
+) -> None:
     _write_curriculum(tmp_path, "a")
     (tmp_path / "info.toml").write_text(
         "format_version = 1\n"
@@ -451,7 +468,9 @@ def test_load_rejects_non_string_exercise_text(tmp_path: Path, field: str) -> No
 
 
 @pytest.mark.parametrize("field", ["welcome_message", "final_message"])
-def test_load_rejects_non_string_manifest_text(tmp_path: Path, field: str) -> None:
+def test_load_rejects_non_string_manifest_text(
+    tmp_path: Path, field: str
+) -> None:
     _write_curriculum(tmp_path, "a")
     info_path = tmp_path / "info.toml"
     info_path.write_text(

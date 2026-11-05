@@ -1,3 +1,4 @@
+# tests/integration/test_cli_doctor.py
 from __future__ import annotations
 
 import os
@@ -31,16 +32,14 @@ def _make_workspace(root: Path) -> Path:
         "answer = 42\n", encoding="utf-8"
     )
     (
-        root
-        / ".pythonlings"
-        / "originals"
-        / "variables"
-        / "variables1.py"
+        root / ".pythonlings" / "originals" / "variables" / "variables1.py"
     ).write_text(exercise, encoding="utf-8")
     return root
 
 
-def _run(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+def _run(
+    *args: str, cwd: Path | None = None
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, "-m", "pythonlings", *args],
         cwd=cwd,
@@ -190,7 +189,9 @@ def test_doctor_is_listed_in_cli_help() -> None:
     assert "doctor" in result.stdout
 
 
-def test_doctor_honors_explicit_root_over_current_workspace(tmp_path: Path) -> None:
+def test_doctor_honors_explicit_root_over_current_workspace(
+    tmp_path: Path,
+) -> None:
     current = _make_workspace(tmp_path / "current")
     explicit = _make_workspace(tmp_path / "explicit")
 

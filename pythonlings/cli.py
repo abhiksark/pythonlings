@@ -3,21 +3,29 @@ from __future__ import annotations
 
 import argparse
 import sys
-from importlib.metadata import PackageNotFoundError, version as _package_version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _package_version
 from pathlib import Path
 
 from pythonlings.core.workspace import default_workspace_root
 
 try:
     __version__ = _package_version("pythonlings")
-except PackageNotFoundError:  # running from a source checkout without an install
+except (
+    PackageNotFoundError
+):  # running from a source checkout without an install
     __version__ = "0.0.0+unknown"
 
 
 # Status glyphs, with ASCII stand-ins for consoles whose encoding cannot
 # represent them (a Windows code page, or LC_ALL=C). The fallbacks stay one
 # column wide so aligned output keeps its shape.
-_ASCII_FALLBACK = {"\u2713": "+", "\u2717": "x", "\u25cf": ">", "\U0001f512": "-"}
+_ASCII_FALLBACK = {
+    "\u2713": "+",
+    "\u2717": "x",
+    "\u25cf": ">",
+    "\U0001f512": "-",
+}
 
 
 def _encodable(stream: object, text: str) -> bool:
@@ -39,7 +47,7 @@ def _symbol(stream: object, glyph: str) -> str:
 
 
 def _write(stream, text: str) -> None:
-    """Write captured output, degrading characters the encoding cannot represent.
+    """Write output, replacing characters the encoding cannot represent.
 
     Check files print their own status line (`print("variables1 \u2713")`), so
     curriculum output reaches us containing glyphs a strict-ASCII console
@@ -49,14 +57,20 @@ def _write(stream, text: str) -> None:
         stream.write(text)
     except UnicodeEncodeError:
         encoding = getattr(stream, "encoding", None) or "ascii"
-        stream.write(text.encode(encoding, "replace").decode(encoding, "replace"))
+        stream.write(
+            text.encode(encoding, "replace").decode(encoding, "replace")
+        )
 
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="pythonlings")
-    parser.add_argument("--version", action="version", version=f"pythonlings {__version__}")
     parser.add_argument(
-        "--debug", action="store_true", help="Write debug output to .pythonlings_debug.log."
+        "--version", action="version", version=f"pythonlings {__version__}"
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Write debug output to .pythonlings_debug.log.",
     )
     parser.add_argument(
         "--root",
@@ -69,10 +83,14 @@ def _build_parser() -> argparse.ArgumentParser:
     p_init = sub.add_parser("init", help="Create a pythonlings workspace.")
     p_init.add_argument("--path", type=Path, default=default_workspace_root())
     p_init.add_argument(
-        "--force", action="store_true", help="Overwrite managed workspace files."
+        "--force",
+        action="store_true",
+        help="Overwrite managed workspace files.",
     )
 
-    p_update = sub.add_parser("update", help="Update an existing pythonlings workspace.")
+    p_update = sub.add_parser(
+        "update", help="Update an existing pythonlings workspace."
+    )
     p_update.add_argument("--path", type=Path, default=None)
 
     sub.add_parser("watch", help="Launch the TUI in watch mode (default).")
@@ -81,7 +99,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p_run = sub.add_parser("run", help="Run a single exercise.")
     p_run.add_argument("name")
 
-    p_dry_run = sub.add_parser("dry-run", help="Run one exercise non-interactively.")
+    p_dry_run = sub.add_parser(
+        "dry-run", help="Run one exercise non-interactively."
+    )
     p_dry_run.add_argument("name")
 
     p_solution = sub.add_parser(
@@ -92,15 +112,23 @@ def _build_parser() -> argparse.ArgumentParser:
     p_hint = sub.add_parser("hint", help="Print the hint for an exercise.")
     p_hint.add_argument("name")
 
-    p_list = sub.add_parser("list", help="List topics, or one topic's exercises.")
-    p_list.add_argument("topic", nargs="?", help="Show exercises of this topic.")
+    p_list = sub.add_parser(
+        "list", help="List topics, or one topic's exercises."
+    )
+    p_list.add_argument(
+        "topic", nargs="?", help="Show exercises of this topic."
+    )
 
     p_start = sub.add_parser("start", help="Launch the TUI on a topic's track.")
     p_start.add_argument("topic")
 
-    p_reset = sub.add_parser("reset", help="Restore an exercise from its snapshot.")
+    p_reset = sub.add_parser(
+        "reset", help="Restore an exercise from its snapshot."
+    )
     p_reset.add_argument("name")
-    p_reset.add_argument("--yes", action="store_true", help="Skip the confirmation prompt.")
+    p_reset.add_argument(
+        "--yes", action="store_true", help="Skip the confirmation prompt."
+    )
 
     p_verify = sub.add_parser(
         "verify", help="Run every exercise, or just one topic's."
@@ -190,7 +218,8 @@ def _cmd_verify(root: Path, topic: str | None) -> int:
 
 def _cmd_list(root: Path, topic: str | None) -> int:
     from pythonlings.core.manifest import load as load_manifest
-    from pythonlings.core.state import load as load_state, next_pending
+    from pythonlings.core.state import load as load_state
+    from pythonlings.core.state import next_pending
 
     manifest = load_manifest(root)
     state = load_state(root)
@@ -199,8 +228,10 @@ def _cmd_list(root: Path, topic: str | None) -> int:
         for name in manifest.topics():
             exs = manifest.exercises_in(name)
             done = sum(1 for ex in exs if ex.name in state.completed)
-            mark = _symbol(sys.stdout, "✓") if done == len(exs) else (
-                _symbol(sys.stdout, "●") if done else " "
+            mark = (
+                _symbol(sys.stdout, "✓")
+                if done == len(exs)
+                else (_symbol(sys.stdout, "●") if done else " ")
             )
             print(f"  {mark}  {name}  {done}/{len(exs)}")
         return 0
@@ -252,13 +283,16 @@ def _cmd_run(root: Path, name: str) -> int:
     if result.stderr:
         _write(sys.stderr, result.stderr)
     if result.timed_out:
-        sys.stderr.write(f"pythonlings: {name} timed out after {result.duration_s:.1f}s\n")
+        sys.stderr.write(
+            f"pythonlings: {name} timed out after {result.duration_s:.1f}s\n"
+        )
         return 1
     if result.exit_code != 0:
         return 1
     if ex.is_pending():
         sys.stderr.write(
-            f"pythonlings: tests pass but the '# I AM NOT DONE' marker is still in {name}.\n"
+            "pythonlings: tests pass but the '# I AM NOT DONE' marker "
+            f"is still in {name}.\n"
         )
         return 1
     return 0
@@ -290,7 +324,8 @@ def _cmd_solution(root: Path, name: str) -> int:
 def _cmd_reset(root: Path, name: str, yes: bool) -> int:
     from pythonlings.core.manifest import load as load_manifest
     from pythonlings.core.reset import ResetError, restore
-    from pythonlings.core.state import load as load_state, save as save_state
+    from pythonlings.core.state import load as load_state
+    from pythonlings.core.state import save as save_state
 
     manifest = load_manifest(root)
     try:
@@ -369,7 +404,9 @@ def main(argv: list[str] | None = None) -> int:
                 )
             except (OSError, RuntimeError) as exc:
                 if args.command == "doctor":
-                    unresolved = args.root if args.root is not None else Path(".")
+                    unresolved = (
+                        args.root if args.root is not None else Path(".")
+                    )
                     return _cmd_doctor(unresolved, resolution_error=exc)
                 raise
             root = resolved.root
@@ -422,9 +459,11 @@ def main(argv: list[str] | None = None) -> int:
             start_topic = getattr(args, "topic", None)
             if start_topic is not None:
                 from pythonlings.core.manifest import load as load_manifest
+
                 if _resolve_topic(load_manifest(root), start_topic) is None:
                     return 2
             from pythonlings.app import run_tui  # lazy: Textual is heavy
+
             return run_tui(
                 root,
                 start_topic,
@@ -437,6 +476,7 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as e:
         # Manifest errors and other startup failures use exit code 2.
         from pythonlings.core.manifest import ManifestError
+
         if isinstance(e, ManifestError):
             sys.stderr.write(f"pythonlings: {e}\n")
             return 2

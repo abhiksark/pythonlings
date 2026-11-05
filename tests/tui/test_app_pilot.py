@@ -8,7 +8,8 @@ from textual.widgets import Footer, Markdown, Static, TextArea
 from textual.worker import WorkerCancelled
 
 from pythonlings.app import PythonlingsApp
-from pythonlings.core.state import State, save as save_state
+from pythonlings.core.state import State
+from pythonlings.core.state import save as save_state
 from pythonlings.screens.docs import DocsScreen
 from pythonlings.screens.topic_picker import TopicPickerScreen
 from pythonlings.screens.track import TrackScreen
@@ -36,7 +37,9 @@ async def _settle(pilot) -> None:
 
 
 @pytest.mark.asyncio
-async def test_default_launch_opens_first_pending_exercise(tmp_path: Path) -> None:
+async def test_default_launch_opens_first_pending_exercise(
+    tmp_path: Path,
+) -> None:
     app = PythonlingsApp(root=_work_copy(tmp_path))
     async with app.run_test() as pilot:
         await _settle(pilot)
@@ -135,13 +138,14 @@ async def test_picker_shows_first_run_start_banner(tmp_path: Path) -> None:
 @pytest.mark.asyncio
 async def test_picker_rows_show_status_labels(tmp_path: Path) -> None:
     work = _work_copy(tmp_path)
-    save_state(work, State(completed={"a1"}, seen_intro=True, last_topic="alpha"))
+    save_state(
+        work, State(completed={"a1"}, seen_intro=True, last_topic="alpha")
+    )
     app = PythonlingsApp(root=work, force_picker=True)
     async with app.run_test() as pilot:
         await _settle(pilot)
         rendered = " ".join(
-            str(row.content)
-            for row in app.screen.query(".topic-row").results()
+            str(row.content) for row in app.screen.query(".topic-row").results()
         )
         assert "Continue" in rendered
         assert "Start" in rendered
@@ -157,7 +161,9 @@ async def test_start_topic_opens_track(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_default_launch_resumes_last_incomplete_exercise(tmp_path: Path) -> None:
+async def test_default_launch_resumes_last_incomplete_exercise(
+    tmp_path: Path,
+) -> None:
     work = _work_copy(tmp_path)
     save_state(
         work,
@@ -172,7 +178,9 @@ async def test_default_launch_resumes_last_incomplete_exercise(tmp_path: Path) -
 
 
 @pytest.mark.asyncio
-async def test_default_launch_falls_back_from_invalid_resume_state(tmp_path: Path) -> None:
+async def test_default_launch_falls_back_from_invalid_resume_state(
+    tmp_path: Path,
+) -> None:
     work = _work_copy(tmp_path)
     save_state(
         work,
@@ -241,9 +249,7 @@ async def test_narrow_layout_keeps_navigation_discoverable_and_usable(
         await pilot.pause()
         assert isinstance(app.screen, TopicPickerScreen)
         picker_footer = app.screen.query_one(Footer)
-        picker_keys = {
-            key.key: key for key in picker_footer.query("FooterKey")
-        }
+        picker_keys = {key.key: key for key in picker_footer.query("FooterKey")}
         escape_key = picker_keys["escape"]
         assert escape_key.region.x >= picker_footer.region.x
         assert escape_key.region.right <= picker_footer.region.right
@@ -254,7 +260,9 @@ async def test_narrow_layout_keeps_navigation_discoverable_and_usable(
 
 
 @pytest.mark.asyncio
-async def test_normal_width_footer_keeps_all_track_labels(tmp_path: Path) -> None:
+async def test_normal_width_footer_keeps_all_track_labels(
+    tmp_path: Path,
+) -> None:
     app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
     async with app.run_test(size=(80, 24)) as pilot:
         await _settle(pilot)
@@ -337,14 +345,18 @@ async def test_f5_opens_docs_popup_for_current_exercise(tmp_path: Path) -> None:
         assert "Local reference" in rendered
         assert "# Variables" not in rendered
         assert "Assigning names" in rendered
-        assert "https://docs.python.org/3/tutorial/introduction.html" in rendered
+        assert (
+            "https://docs.python.org/3/tutorial/introduction.html" in rendered
+        )
         footer = app.screen.query_one("#docs-footer", Static).content
         assert "O Open official docs" in str(footer)
         assert "Esc Close" in str(footer)
 
 
 @pytest.mark.asyncio
-async def test_escape_closes_docs_popup_without_quitting(tmp_path: Path) -> None:
+async def test_escape_closes_docs_popup_without_quitting(
+    tmp_path: Path,
+) -> None:
     app = PythonlingsApp(root=_work_copy(tmp_path), start_topic="alpha")
     async with app.run_test() as pilot:
         await _settle(pilot)
@@ -371,7 +383,9 @@ async def test_docs_popup_can_open_browser(
         assert isinstance(app.screen, DocsScreen)
         await pilot.press("o")
         await pilot.pause()
-        assert opened == ["https://docs.python.org/3/tutorial/introduction.html"]
+        assert opened == [
+            "https://docs.python.org/3/tutorial/introduction.html"
+        ]
 
 
 @pytest.mark.asyncio
@@ -562,7 +576,9 @@ async def test_solving_a_topic_marks_progress(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_picker_refreshes_progress_after_returning(tmp_path: Path) -> None:
+async def test_picker_refreshes_progress_after_returning(
+    tmp_path: Path,
+) -> None:
     work = _work_copy(tmp_path)
     app = PythonlingsApp(root=work, start_topic="beta")
     async with app.run_test() as pilot:
@@ -576,8 +592,7 @@ async def test_picker_refreshes_progress_after_returning(tmp_path: Path) -> None
         await _settle(pilot)
         assert isinstance(app.screen, TopicPickerScreen)
         rendered = " ".join(
-            str(row.content)
-            for row in app.screen.query(".topic-row").results()
+            str(row.content) for row in app.screen.query(".topic-row").results()
         )
         # beta's one exercise is now done -> "1/1" must appear.
         assert "1/1" in rendered

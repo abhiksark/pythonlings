@@ -85,16 +85,25 @@ def test_snapshot_keys_on_exercise_name_not_filename(tmp_path: Path) -> None:
     snapshot(tmp_path, b)
 
     originals = tmp_path / ".pythonlings" / "originals"
-    assert (originals / "variables_utils.py").read_text() == "variables-version\n"
-    assert (originals / "functions_utils.py").read_text() == "functions-version\n"
+    assert (
+        originals / "variables_utils.py"
+    ).read_text() == "variables-version\n"
+    assert (
+        originals / "functions_utils.py"
+    ).read_text() == "functions-version\n"
 
 
-def test_restore_uses_pristine_originals_not_current_file(tmp_path: Path) -> None:
+def test_restore_uses_pristine_originals_not_current_file(
+    tmp_path: Path,
+) -> None:
     root = init_workspace(tmp_path / "workspace")
     manifest = load(root)
     exercise = manifest.exercises[0]
-    original = root / ".pythonlings" / "originals" / exercise.rel_path.relative_to(
-        "exercises"
+    original = (
+        root
+        / ".pythonlings"
+        / "originals"
+        / exercise.rel_path.relative_to("exercises")
     )
     pristine = original.read_text(encoding="utf-8")
     exercise.path.write_text("# corrupted user edit\n", encoding="utf-8")

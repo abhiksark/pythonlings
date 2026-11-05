@@ -1,3 +1,4 @@
+# tests/unit/test_workspace.py
 from __future__ import annotations
 
 from pathlib import Path
@@ -35,7 +36,9 @@ def _make_ws(path: Path) -> Path:
 def test_resolve_prefers_explicit_root(tmp_path, monkeypatch):
     monkeypatch.setenv("PYTHONLINGS_HOME", str(tmp_path / "home"))
     explicit = tmp_path / "given"
-    out = resolve_workspace_root(tmp_path / "cwd", explicit, create_if_missing=True)
+    out = resolve_workspace_root(
+        tmp_path / "cwd", explicit, create_if_missing=True
+    )
     assert out == ResolvedWorkspace(explicit.resolve(), created=False)
 
 
@@ -65,6 +68,8 @@ def test_resolve_creates_home_when_missing(tmp_path, monkeypatch):
 def test_resolve_does_not_create_when_flag_off(tmp_path, monkeypatch):
     home = tmp_path / "home"
     monkeypatch.setenv("PYTHONLINGS_HOME", str(home))
-    out = resolve_workspace_root(tmp_path / "cwd", None, create_if_missing=False)
+    out = resolve_workspace_root(
+        tmp_path / "cwd", None, create_if_missing=False
+    )
     assert out == ResolvedWorkspace(home.resolve(), created=False)
     assert not home.exists()

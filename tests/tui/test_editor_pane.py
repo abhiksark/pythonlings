@@ -44,7 +44,7 @@ async def test_editor_recovers_after_unreadable_exercise(
     exercise = Exercise("ex", path, tmp_path / "check.py", "t", "")
     app = _Harness()
 
-    async with app.run_test() as pilot:
+    async with app.run_test():
         pane = app.query_one(EditorPane)
         pane.load_exercise(exercise)
         assert pane.query_one("#code", TextArea).read_only

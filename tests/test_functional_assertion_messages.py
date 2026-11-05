@@ -2,7 +2,6 @@
 import ast
 from pathlib import Path
 
-
 CHECKS_DIR = Path(__file__).resolve().parent.parent / "checks" / "functional"
 
 BATCH = ("functional7.py", "functional8.py", "functional9.py")
