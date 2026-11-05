@@ -1,3 +1,4 @@
+# tests/unit/test_docs.py
 from pathlib import Path
 
 from pythonlings.core.docs import load_snippet
@@ -37,7 +38,9 @@ def test_real_curriculum_topics_have_bundled_references() -> None:
     assert missing == []
 
 
-def test_docs_screen_markdown_includes_configured_docs_for_all_exercises() -> None:
+def test_docs_screen_markdown_includes_configured_docs_for_all_exercises() -> (
+    None
+):
     repo = Path(__file__).parents[2]
     manifest = load(repo)
 

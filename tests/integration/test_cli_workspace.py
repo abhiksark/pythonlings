@@ -4,9 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from pythonlings.core import curriculum
 from pythonlings.cli import main
-
+from pythonlings.core import curriculum
 
 _STALE_CHECK = "# stale check used to identify the updated workspace\n"
 
@@ -43,7 +42,9 @@ def test_init_command_creates_workspace(tmp_path: Path) -> None:
     ]
 
 
-def test_init_rejects_non_empty_non_workspace_dir(tmp_path: Path, capsys) -> None:
+def test_init_rejects_non_empty_non_workspace_dir(
+    tmp_path: Path, capsys
+) -> None:
     target = tmp_path / "stuff"
     target.mkdir()
     (target / "notes.txt").write_text("keep", encoding="utf-8")
@@ -55,7 +56,9 @@ def test_init_rejects_non_empty_non_workspace_dir(tmp_path: Path, capsys) -> Non
     assert "isn't empty and isn't a pythonlings workspace" in err
 
 
-def test_init_on_existing_workspace_is_friendly_noop(tmp_path: Path, capsys) -> None:
+def test_init_on_existing_workspace_is_friendly_noop(
+    tmp_path: Path, capsys
+) -> None:
     target = tmp_path / "ws"
     assert main(["init", "--path", str(target)]) == 0
     capsys.readouterr()  # discard first output
@@ -153,7 +156,7 @@ def test_update_via_path_migrates_legacy_state_dir(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    # --path points at the workspace; cwd is elsewhere. The legacy dir must move.
+    # --path points at the workspace, not cwd; the legacy dir must move.
     main(["update", "--path", str(target)])
 
     assert not (target / ".pylings").exists()
@@ -212,7 +215,9 @@ def test_update_path_takes_precedence_over_root_and_cwd(
     _assert_not_updated(cwd_check)
 
 
-def test_update_root_takes_precedence_over_cwd(tmp_path: Path, monkeypatch) -> None:
+def test_update_root_takes_precedence_over_cwd(
+    tmp_path: Path, monkeypatch
+) -> None:
     cwd = tmp_path / "cwd-ws"
     root = tmp_path / "root-ws"
     cwd_check = _stale_workspace(cwd)
@@ -226,7 +231,9 @@ def test_update_root_takes_precedence_over_cwd(tmp_path: Path, monkeypatch) -> N
     _assert_not_updated(cwd_check)
 
 
-def test_bare_update_prefers_current_workspace(tmp_path: Path, monkeypatch) -> None:
+def test_bare_update_prefers_current_workspace(
+    tmp_path: Path, monkeypatch
+) -> None:
     home = tmp_path / "home-ws"
     monkeypatch.setenv("PYTHONLINGS_HOME", str(home))
     home_check = _stale_workspace(home)

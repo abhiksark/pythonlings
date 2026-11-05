@@ -20,7 +20,9 @@ def _resolve_path(path: Path, description: str) -> Path:
     try:
         return path.resolve()
     except (OSError, RuntimeError) as e:
-        raise ManifestError(f"could not resolve {description} at {path}: {e}") from e
+        raise ManifestError(
+            f"could not resolve {description} at {path}: {e}"
+        ) from e
 
 
 @dataclass(frozen=True)
@@ -70,11 +72,14 @@ def load(root: Path) -> Manifest:
     except tomllib.TOMLDecodeError as e:
         raise ManifestError(f"info.toml is not valid TOML: {e}") from e
     except OSError as e:
-        raise ManifestError(f"could not read info.toml at {info_path}: {e}") from e
+        raise ManifestError(
+            f"could not read info.toml at {info_path}: {e}"
+        ) from e
 
     if data.get("format_version") != 1:
         raise ManifestError(
-            f"info.toml format_version must be 1, got {data.get('format_version')!r}"
+            "info.toml format_version must be 1, "
+            f"got {data.get('format_version')!r}"
         )
 
     welcome_message = data.get("welcome_message", "Welcome to pythonlings!")
@@ -88,10 +93,14 @@ def load(root: Path) -> Manifest:
 
     raw_exercises = data.get("exercises", [])
     if not isinstance(raw_exercises, list) or not raw_exercises:
-        raise ManifestError("info.toml must define a non-empty [[exercises]] array")
+        raise ManifestError(
+            "info.toml must define a non-empty [[exercises]] array"
+        )
 
     resolved_root = _resolve_path(root, "workspace root")
-    exercises_root = _resolve_path(root / "exercises", "workspace exercises/ directory")
+    exercises_root = _resolve_path(
+        root / "exercises", "workspace exercises/ directory"
+    )
     checks_root = _resolve_path(root / "checks", "workspace checks/ directory")
     for directory, resolved_directory in (
         ("exercises", exercises_root),
@@ -142,7 +151,9 @@ def load(root: Path) -> Manifest:
         # when the written path looks clean (e.g. exercises/link/a.py
         # where "link" is a symlink pointing elsewhere). Resolve and
         # confirm containment before touching the filesystem further.
-        resolved_abs_path = _resolve_path(abs_path, f"exercise path for {name!r}")
+        resolved_abs_path = _resolve_path(
+            abs_path, f"exercise path for {name!r}"
+        )
         if not resolved_abs_path.is_relative_to(exercises_root):
             raise ManifestError(
                 f"exercise {name!r} path escapes the workspace exercises/ "
@@ -154,7 +165,9 @@ def load(root: Path) -> Manifest:
         # Derive the check path: exercises/<...> mirrors to checks/<...>.
         check_rel = Path("checks", *rel_path.parts[1:])
         check_abs = root / check_rel
-        resolved_check_abs = _resolve_path(check_abs, f"check path for {name!r}")
+        resolved_check_abs = _resolve_path(
+            check_abs, f"check path for {name!r}"
+        )
         if not resolved_check_abs.is_relative_to(checks_root):
             raise ManifestError(
                 f"check path for {name!r} escapes the workspace checks/ "

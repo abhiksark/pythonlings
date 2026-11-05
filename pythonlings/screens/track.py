@@ -11,7 +11,8 @@ from textual.widgets import Footer, Header, TextArea
 
 from pythonlings.core.exercise import Exercise, RunResult
 from pythonlings.core.runner import run as run_exercise
-from pythonlings.core.state import completed_count, next_pending, save as save_state
+from pythonlings.core.state import completed_count, next_pending
+from pythonlings.core.state import save as save_state
 from pythonlings.widgets.editor_pane import EditorPane
 from pythonlings.widgets.exercise_tree import ExerciseTree
 from pythonlings.widgets.output_panel import OutputPanel
@@ -52,8 +53,10 @@ def celebration_message(total: int) -> str:
     return (
         f"🎉  You finished all {total} pythonlings exercises! 🎉\n\n"
         "That's the whole curriculum — nicely done.\n"
-        f"Share it: \"I just completed all {total} pythonlings Python exercises 🎉\"\n"
-        "If pythonlings helped, a ⭐ on GitHub or a contribution is hugely appreciated.\n\n"
+        f'Share it: "I just completed all {total} '
+        'pythonlings Python exercises 🎉"\n'
+        "If pythonlings helped, a ⭐ on GitHub "
+        "or a contribution is hugely appreciated.\n\n"
         "Press Ctrl+Q to quit, or F4 to revisit topics."
     )
 
@@ -169,7 +172,9 @@ class TrackScreen(Screen[None]):
             return
         if self._save_timer is not None:
             self._save_timer.stop()
-        self._save_timer = self.set_timer(_DEBOUNCE_SECONDS, self._flush_and_run)
+        self._save_timer = self.set_timer(
+            _DEBOUNCE_SECONDS, self._flush_and_run
+        )
 
     def _flush_and_run(self) -> None:
         self._save_timer = None
@@ -240,7 +245,9 @@ class TrackScreen(Screen[None]):
     def action_toggle_hint(self) -> None:
         if self.current is None:
             return
-        self.query_one(OutputPanel).toggle_hint(self._exercise(self.current).hint)
+        self.query_one(OutputPanel).toggle_hint(
+            self._exercise(self.current).hint
+        )
 
     def action_reset(self) -> None:
         from pythonlings.core.reset import restore

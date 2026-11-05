@@ -44,7 +44,9 @@ def load_snippet(topic: str, source_url: str = "") -> DocSnippet | None:
 def _load_index() -> dict[str, Any] | None:
     try:
         docs_root = resources.files("pythonlings.docs")
-        return json.loads((docs_root / "index.json").read_text(encoding="utf-8"))
+        return json.loads(
+            (docs_root / "index.json").read_text(encoding="utf-8")
+        )
     except (FileNotFoundError, json.JSONDecodeError, ModuleNotFoundError):
         return None
 

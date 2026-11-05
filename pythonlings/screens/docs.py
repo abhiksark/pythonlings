@@ -44,9 +44,16 @@ class DocsScreen(ModalScreen[None]):
 
     def compose(self) -> ComposeResult:
         yield Vertical(
-            Static(f"[bold]Docs: {escape(self.exercise.name)}[/bold]", id="docs-title"),
+            Static(
+                f"[bold]Docs: {escape(self.exercise.name)}[/bold]",
+                id="docs-title",
+            ),
             VerticalScroll(
-                Markdown(self._reference_markdown(), id="docs-content", open_links=False),
+                Markdown(
+                    self._reference_markdown(),
+                    id="docs-content",
+                    open_links=False,
+                ),
                 id="docs-scroll",
             ),
             _DocsFooter(_COMPACT_FOOTER_TEXT, id="docs-footer"),

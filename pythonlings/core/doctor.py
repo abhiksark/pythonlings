@@ -1,3 +1,4 @@
+# pythonlings/core/doctor.py
 from __future__ import annotations
 
 import errno
@@ -67,7 +68,8 @@ def run_diagnostics(
             CheckResult(
                 "Workspace",
                 CheckStatus.FAILURE,
-                f"could not resolve {display_root}: {exc}; check the path and symlinks",
+                f"could not resolve {display_root}: {exc}; "
+                "check the path and symlinks",
             )
         )
         return DoctorReport(root=display_root, checks=tuple(checks))
@@ -152,7 +154,8 @@ def _check_workspace(root: Path) -> CheckResult:
             "Workspace",
             CheckStatus.FAILURE,
             f"missing or invalid required paths: {', '.join(invalid)}; "
-            "run `pythonlings update --path <workspace>` or initialize a new workspace",
+            "run `pythonlings update --path <workspace>` "
+            "or initialize a new workspace",
         )
     return CheckResult("Workspace", CheckStatus.OK, str(root))
 
@@ -238,10 +241,13 @@ def _check_state(root: Path) -> CheckResult:
             return CheckResult(
                 "Progress state",
                 CheckStatus.WARNING,
-                f"state.json is a broken symlink: {exc}; replace or remove the link",
+                f"state.json is a broken symlink: {exc}; "
+                "replace or remove the link",
             )
     if not path.exists():
-        return CheckResult("Progress state", CheckStatus.OK, "no progress file yet")
+        return CheckResult(
+            "Progress state", CheckStatus.OK, "no progress file yet"
+        )
     if not path.is_file():
         return CheckResult(
             "Progress state",
@@ -255,14 +261,16 @@ def _check_state(root: Path) -> CheckResult:
         return CheckResult(
             "Progress state",
             CheckStatus.WARNING,
-            f"state.json is unreadable: {exc}; back it up before starting Pythonlings",
+            f"state.json is unreadable: {exc}; "
+            "back it up before starting Pythonlings",
         )
 
     if not isinstance(data, dict):
         return CheckResult(
             "Progress state",
             CheckStatus.WARNING,
-            "state.json must contain an object; back it up before starting Pythonlings",
+            "state.json must contain an object; "
+            "back it up before starting Pythonlings",
         )
     if data.get("format_version") != FORMAT_VERSION:
         return CheckResult(
@@ -283,7 +291,9 @@ def _check_state(root: Path) -> CheckResult:
             "back up state.json before starting Pythonlings",
         )
     return CheckResult(
-        "Progress state", CheckStatus.OK, f"readable ({len(completed)} completed)"
+        "Progress state",
+        CheckStatus.OK,
+        f"readable ({len(completed)} completed)",
     )
 
 
@@ -333,7 +343,8 @@ def _check_docs(manifest: Manifest | None) -> CheckResult:
             return CheckResult(
                 "Bundled docs",
                 CheckStatus.OK,
-                "documentation index is readable; topic coverage was not checked",
+                "documentation index is readable; "
+                "topic coverage was not checked",
             )
 
         missing: list[str] = []
@@ -383,13 +394,19 @@ def _manifest_validation_error(manifest: Manifest) -> str | None:
 
     for exercise in manifest.exercises:
         if not isinstance(exercise.name, str) or not exercise.name:
-            return f"exercise name must be a non-empty string, got {exercise.name!r}"
+            return (
+                "exercise name must be a non-empty string, "
+                f"got {exercise.name!r}"
+            )
         if not isinstance(exercise.hint, str):
             return f"hint for {exercise.name!r} must be a string"
         if not isinstance(exercise.docs, str):
             return f"docs for {exercise.name!r} must be a string"
         if not exercise.path.is_file():
-            return f"exercise path is not a file: {exercise.rel_path or exercise.path}"
+            return (
+                "exercise path is not a file: "
+                f"{exercise.rel_path or exercise.path}"
+            )
         if not exercise.check_path.is_file():
             return (
                 "check path is not a file: "

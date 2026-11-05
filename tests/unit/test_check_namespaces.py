@@ -12,7 +12,9 @@ def test_area_check_preserves_learner_globals() -> None:
     namespace["area"] = 0
     check = (
         Path(__file__).resolve().parents[2]
-        / "checks" / "oop_advanced" / "oop_advanced3.py"
+        / "checks"
+        / "oop_advanced"
+        / "oop_advanced3.py"
     )
 
     exec(
@@ -51,7 +53,9 @@ def test_functional_messages_do_not_repeat_failed_calls(
     namespace[function] = wrong_once
     check = (
         Path(__file__).resolve().parents[2]
-        / "checks" / "functional" / f"{name}.py"
+        / "checks"
+        / "functional"
+        / f"{name}.py"
     )
     with pytest.raises(AssertionError, match="should be"):
         exec(

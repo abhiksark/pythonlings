@@ -20,7 +20,8 @@ def format_progress(
     overall_bar, overall_pct = _bar(overall_completed, overall_total)
     return (
         f"Topic: {topic_bar} {completed}/{total} ({topic_pct:.0f}%)"
-        f"   Overall: {overall_bar} {overall_completed}/{overall_total} ({overall_pct:.0f}%)"
+        f"   Overall: {overall_bar} {overall_completed}/{overall_total} "
+        f"({overall_pct:.0f}%)"
     )
 
 

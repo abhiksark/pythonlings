@@ -40,7 +40,7 @@ def test_asserts_have_messages() -> None:
             "data = {}\nname = 'Ada'\n",
             "{'name': 'Ada', 'language': 'Python'}",
         ),
-        ("json2", "text = '{}'\n", "'{\"a\": 1, \"b\": 2}'"),
+        ("json2", "text = '{}'\n", '\'{"a": 1, "b": 2}\''),
     ],
 )
 def test_failure_reports_expected_json_value(

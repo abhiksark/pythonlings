@@ -68,7 +68,9 @@ def _write_workspace_gitignore(root: Path) -> None:
         existing = ""
 
     existing_lines = set(existing.splitlines())
-    missing_lines = [line for line in GITIGNORE_LINES if line not in existing_lines]
+    missing_lines = [
+        line for line in GITIGNORE_LINES if line not in existing_lines
+    ]
     if not missing_lines:
         return
 
@@ -95,7 +97,8 @@ def init_workspace(path: Path, *, force: bool = False) -> Path:
     if path.exists() and any(path.iterdir()) and not force:
         raise WorkspaceError(
             f"{path} isn't empty and isn't a pythonlings workspace. "
-            "Pick another location with --path <dir>, or --force to set up here anyway."
+            "Pick another location with --path <dir>, "
+            "or --force to set up here anyway."
         )
     src_root = source_root().resolve()
     if path == src_root:

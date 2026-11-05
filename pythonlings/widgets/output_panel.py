@@ -137,7 +137,9 @@ class OutputPanel(Vertical):
         self, exercise: Exercise, completed: int = 0, total: int = 0
     ) -> None:
         header = self.query_one("#output-header", Static)
-        progress = f"   [dim]{completed}/{total} complete[/dim]" if total else ""
+        progress = (
+            f"   [dim]{completed}/{total} complete[/dim]" if total else ""
+        )
         header.update(
             f"[bold]{exercise.name}[/bold]{progress}   "
             f"[dim]{self._display_path(exercise)}[/dim]\n"
@@ -183,7 +185,9 @@ class OutputPanel(Vertical):
             hint.remove_class("visible")
         else:
             hint.add_class("visible")
-            hint.update(f"[italic]Hint:[/italic] {text or '(no hint provided)'}")
+            hint.update(
+                f"[italic]Hint:[/italic] {text or '(no hint provided)'}"
+            )
 
     def reset_hint(self) -> None:
         hint = self.query_one("#hint", Static)

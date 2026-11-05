@@ -8,8 +8,7 @@ import sys
 import tempfile
 import time
 
-from pythonlings.core.exercise import Exercise
-from pythonlings.core.exercise import RunResult
+from pythonlings.core.exercise import Exercise, RunResult
 
 DEFAULT_TIMEOUT_S = 5.0
 
@@ -121,8 +120,8 @@ def run(exercise: Exercise, timeout_s: float = DEFAULT_TIMEOUT_S) -> RunResult:
 def run_verify(
     exercise: Exercise, timeout_s: float = DEFAULT_TIMEOUT_S
 ) -> RunResult:
-    """Run an exercise but treat the marker as a no-op (CI / curriculum-author mode)."""
+    """Run an exercise ignoring its marker (CI / curriculum-author mode)."""
     result = run(exercise, timeout_s=timeout_s)
-    # `verify` cares only about exit code; recompute passed without the marker check.
+    # `verify` cares only about exit code, ignoring the marker check.
     result.passed = result.exit_code == 0 and not result.timed_out
     return result
