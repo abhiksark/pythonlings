@@ -31,7 +31,7 @@ uvx pythonlings
 How it works: **edit** the broken exercise in the built-in editor → checks
 rerun as you type and advance you to the next one. That's the whole loop.
 
-Status: alpha. Published on PyPI as `pythonlings`.
+Status: v0.4.0 (alpha). Published on PyPI as `pythonlings`.
 
 ![Coding screen](https://raw.githubusercontent.com/abhiksark/pythonlings/v0.4.4/docs/assets/screenshots/coding-screen.png)
 
@@ -209,6 +209,12 @@ Contributors coordinate on the BangPypers Discord —
 [join here](https://discord.gg/JVrYn5fH2) — and in
 [GitHub Discussions](https://github.com/abhiksark/pythonlings/discussions).
 
+## Roadmap
+
+- **0.3.0** — shipped: topic picker, progress tracking, hints, and local docs.
+- **0.4.0** — current: live editor checks, resume state, and one-shot CLI runs.
+- **Next** — more exercises, richer hints, and expanded offline docs.
+
 ## Release Flow
 
 Pythonlings uses Semantic Versioning:
@@ -224,7 +230,7 @@ feature/<name> -> dev -> main -> vMAJOR.MINOR.PATCH
 ```
 
 Feature branches are merged into `dev`. A verified `dev` branch is then merged
-into `main` and tagged with an annotated release tag such as `v0.1.0`.
+into `main` and tagged with an annotated release tag such as `v0.4.0`.
 See [RELEASE.md](https://github.com/abhiksark/pythonlings/blob/main/RELEASE.md) for the release checklist.
 
 ## Attribution
