@@ -267,6 +267,7 @@ def _cmd_hint(root: Path, name: str) -> int:
 
 
 def _cmd_run(root: Path, name: str) -> int:
+    from pythonlings.core.exercise import Exercise
     from pythonlings.core.manifest import load as load_manifest
     from pythonlings.core.runner import run as run_exercise
 
@@ -291,8 +292,8 @@ def _cmd_run(root: Path, name: str) -> int:
         return 1
     if ex.is_pending():
         sys.stderr.write(
-            "pythonlings: tests pass but the '# I AM NOT DONE' marker "
-            f"is still in {name}.\n"
+            "pythonlings: tests pass but the "
+            f"'{Exercise.DONE_MARKER}' marker is still in {name}.\n"
         )
         return 1
     return 0
